@@ -47,8 +47,12 @@ public class TxStatusTransitorImpl<MODEL, STATUS, TRIGGER>
         return statusStatusEntryMap::get;
     }
 
-    public void setStatusEntryBindList(List<Pair<STATUS, StatusEntry>> entryBindList) {
-        setStatusEntryFunction(convert(entryBindList));
+    public void setStatusEntryBindingList(List<Pair<STATUS, StatusEntry>> entryBindingList) {
+        setStatusEntryFunction(convert(entryBindingList));
+    }
+
+    public void setStatusEntryBindingMap(Map<STATUS, StatusEntry> entryBindingMap) {
+        setStatusEntryFunction(entryBindingMap::get);
     }
 
     @Override

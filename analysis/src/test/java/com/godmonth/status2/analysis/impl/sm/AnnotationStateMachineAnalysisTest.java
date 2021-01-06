@@ -1,7 +1,7 @@
 package com.godmonth.status2.analysis.impl.sm;
 
 import com.godmonth.status2.analysis.impl.Abc;
-import com.godmonth.status2.analysis.impl.model.AnnotationBeanModelAnalysis;
+import com.godmonth.status2.analysis.impl.AnnotationBeanModelAnalysis;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -14,7 +14,5 @@ class AnnotationStateMachineAnalysisTest {
     void name() {
         AnnotationBeanModelAnalysis annotationBeanModelAnalysis = new AnnotationBeanModelAnalysis(Abc.class);
         System.out.println(annotationBeanModelAnalysis);
-        AnnotationStateMachineAnalysis annotationStateMachineAnalysis = new AnnotationStateMachineAnalysis(annotationBeanModelAnalysis);
-        System.out.println(annotationStateMachineAnalysis);
     }
 }

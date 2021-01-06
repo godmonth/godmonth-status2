@@ -22,7 +22,7 @@ public class SampleModel {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Status
+    @Status(triggerClass = SampleTrigger.class)
     @Enumerated(EnumType.STRING)
     private SampleStatus status;
 

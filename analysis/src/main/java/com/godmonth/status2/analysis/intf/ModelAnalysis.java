@@ -12,6 +12,8 @@ public interface ModelAnalysis<MODEL> {
 
     Class getStatusClass();
 
+    Class getTriggerClass();
+
     <STATUS> STATUS getStatus(MODEL model);
 
     <STATUS> void setStatus(MODEL model, STATUS value);

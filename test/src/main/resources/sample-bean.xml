@@ -16,27 +16,37 @@
       </bean>
 -->
 
-    <bean id="sampleModelAnalysis" class="com.godmonth.status2.analysis.impl.model.AnnotationBeanModelAnalysis"
-          c:_0="SampleModel"/>
-    <bean id="sampleStateMachineAnalysis" class="com.godmonth.status2.analysis.impl.sm.AnnotationStateMachineAnalysis"
-          c:_0-ref="sampleModelAnalysis"/>
+    <bean id="sampleModelAnalysis" class="com.godmonth.status2.analysis.impl.AnnotationBeanModelAnalysis"
+          c:_0="com.godmonth.status2.test.sample.domain.SampleModel"/>
 
-    <bean id="sampleModelExecutor" class="com.godmonth.status2.executor.impl.OldDefaultOrderExecutor"
+    <bean id="sampleModelExecutor" class="com.godmonth.status2.executor.impl.DefaultOrderExecutor"
           p:txStatusTransitor-ref="sampleModelStatusTransitor" p:modelAnalysis-ref="sampleModelAnalysis">
-        <property name="advancerBindingList">
-            <bean class="com.godmonth.status2.builder.advancer.OldAdvancerConverter" factory-method="convert2Binding">
-                <constructor-arg>
-                    <list>
-                        <bean class="com.godmonth.status2.test.sample.machine.advancer.PayAdvancer"/>
-                        <bean class="com.godmonth.status2.test.sample.machine.advancer.CheckAdvancer"/>
-                    </list>
-                </constructor-arg>
-            </bean>
+        <property name="advancerBindingMap">
+            <map>
+                <entry>
+                    <key>
+                        <util:constant static-field="com.godmonth.status2.test.sample.domain.SampleStatus.PAID"/>
+                    </key>
+                    <bean class="com.godmonth.status2.test.sample.machine.advancer.PayAdvancer"/>
+                </entry>
+            </map>
         </property>
+        <!-- 另外一种方式<property name="advancerBindingList">
+             <list>
+                 <bean class="org.apache.commons.lang3.tuple.Pair" factory-method="of">
+                     <constructor-arg>
+                         <util:constant static-field="com.godmonth.status2.test.sample.domain.SampleStatus.PAID"/>
+                     </constructor-arg>
+                     <constructor-arg>
+                         <bean class="com.godmonth.status2.test.sample.machine.entry.EchoStatusEntry"/>
+                     </constructor-arg>
+                 </bean>
+             </list>
+         </property>-->
     </bean>
 
     <bean id="statusRepositoryStatusTransitor" abstract="true"
-          class="com.godmonth.status2.transitor.tx.impl.TxStatusTransitorImpl"
+          class="com.godmonth.status2.transitor.tx.impl.TxStatusTransetStatusEntryBindingMapsitorImpl"
           p:transactionOperations-ref="transactionTemplate">
         <property name="modelMerger">
             <bean class="com.godmonth.status2.transitor.tx.impl.jpa.EntityManagerMergerImpl" autowire="byType"/>
@@ -49,23 +59,32 @@
             <bean class="com.godmonth.status2.transitor.core.impl.SimpleStatusTransitor">
                 <constructor-arg>
                     <bean class="com.godmonth.status2.builder.transitor.JsonDefinitionFactoryBean"
-                          p:stateMachineAnalysis-ref="sampleStateMachineAnalysis"
-                          p:resource="classpath:/sample-status.json"/>
+                          p:modelAnalysis-ref="sampleModelAnalysis" p:resource="classpath:/sample-status.json"/>
                 </constructor-arg>
             </bean>
         </property>
-        <property name="statusEntryBindList">
-            <list>
-                <bean class="org.apache.commons.lang3.tuple.Pair" factory-method="of">
-                    <constructor-arg>
-                        <util:constant static-field="SampleStatus.PAID"/>
-                    </constructor-arg>
-                    <constructor-arg>
-                        <bean class="com.godmonth.status2.test.sample.machine.entry.EchoStatusEntry"/>
-                    </constructor-arg>
-                </bean>
-            </list>
+        <property name="statusEntryBindingMap">
+            <map>
+                <entry>
+                    <key>
+                        <util:constant static-field="com.godmonth.status2.test.sample.domain.SampleStatus.PAID"/>
+                    </key>
+                    <bean class="com.godmonth.status2.test.sample.machine.entry.EchoStatusEntry"/>
+                </entry>
+            </map>
         </property>
+        <!-- 另外一种方式 <property name="statusEntryBindingList">
+              <list>
+                  <bean class="org.apache.commons.lang3.tuple.Pair" factory-method="of">
+                      <constructor-arg>
+                          <util:constant static-field="SampleStatus.PAID"/>
+                      </constructor-arg>
+                      <constructor-arg>
+                          <bean class="com.godmonth.status2.test.sample.machine.entry.EchoStatusEntry"/>
+                      </constructor-arg>
+                  </bean>
+              </list>
+          </property>-->
     </bean>
 
 

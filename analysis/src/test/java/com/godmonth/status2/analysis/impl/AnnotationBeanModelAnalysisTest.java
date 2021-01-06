@@ -1,6 +1,5 @@
 package com.godmonth.status2.analysis.impl;
 
-import com.godmonth.status2.analysis.impl.model.AnnotationBeanModelAnalysis;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.Test;
 

@@ -1,4 +1,4 @@
-package com.godmonth.status2.analysis.impl.model;
+package com.godmonth.status2.analysis.impl;
 
 import jodd.bean.BeanUtil;
 import lombok.AllArgsConstructor;

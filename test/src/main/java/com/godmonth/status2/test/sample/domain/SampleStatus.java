@@ -1,14 +1,10 @@
 package com.godmonth.status2.test.sample.domain;
 
-import com.godmonth.status2.annotations.Trigger;
-import com.godmonth.status2.test.sample.machine.trigger.SampleTrigger;
-
 /**
  * 测试状态
  *
  * @author shenyue
  */
-@Trigger(SampleTrigger.class)
 public enum SampleStatus {
     /**
      * 已创建

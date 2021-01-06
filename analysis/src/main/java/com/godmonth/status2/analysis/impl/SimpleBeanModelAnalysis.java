@@ -1,9 +1,13 @@
-package com.godmonth.status2.analysis.impl.model;
+package com.godmonth.status2.analysis.impl;
 
 import com.godmonth.status2.analysis.intf.ModelAnalysis;
+import com.godmonth.status2.annotations.Status;
 import jodd.bean.BeanUtil;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Singular;
 import lombok.ToString;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -15,35 +19,34 @@ import java.util.function.Predicate;
 /**
  * @param <MODEL>
  */
+@Builder
 @ToString
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class SimpleBeanModelAnalysis<MODEL> implements ModelAnalysis<MODEL> {
     protected Class<MODEL> modelClass;
 
     protected String statusPropertyName;
 
-    protected List<Predicate<MODEL>> predicateList;
-
     protected Class statusClass;
 
-    public SimpleBeanModelAnalysis(Class<MODEL> modelClass, String statusPropertyName) {
-        this(modelClass, statusPropertyName, null);
-    }
+    protected Class triggerClass;
 
-    @Builder
-    public SimpleBeanModelAnalysis(Class<MODEL> modelClass, String statusPropertyName, List<Predicate<MODEL>> predicateList) {
-        this.modelClass = modelClass;
-        this.statusPropertyName = statusPropertyName;
-        this.predicateList = predicateList;
-        initStatusClass();
-    }
+    @Singular("predicate")
+    protected List<Predicate<MODEL>> predicateList;
 
-    protected void initStatusClass() {
-        Field statusField = FieldUtils.getField(modelClass, statusPropertyName, true);
-        Validate.notNull(statusField, "can't get statusField[" + statusPropertyName + "]");
-        statusClass = statusField.getType();
-    }
+    private static String getStatusPropertyName(Class modelClass) {
+        Field[] fields = FieldUtils.getAllFields(modelClass);
+        for (Field field : fields) {
+            Status annotation = field.getAnnotation(Status.class);
+            if (annotation != null) {
+                return field.getName();
 
+            }
+        }
+        throw new IllegalArgumentException("statusPropertyName is null.");
+    }
 
     @Override
     public void validate(MODEL model) {
@@ -55,6 +58,11 @@ public class SimpleBeanModelAnalysis<MODEL> implements ModelAnalysis<MODEL> {
         }
     }
 
+    protected void initStatusClass() {
+        Field statusField = FieldUtils.getField(modelClass, statusPropertyName, true);
+        Validate.notNull(statusField, "can't get statusField[" + statusPropertyName + "]");
+        statusClass = statusField.getType();
+    }
 
     @Override
     public <STATUS> STATUS getStatus(MODEL model) {

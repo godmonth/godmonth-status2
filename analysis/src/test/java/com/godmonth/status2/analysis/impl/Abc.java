@@ -10,6 +10,6 @@ import lombok.Data;
  */
 @Data
 public class Abc {
-    @Status
+    @Status(triggerClass = AbcTrigger.class)
     private AbcStatus abc;
 }

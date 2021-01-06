@@ -1,6 +1,7 @@
 package com.godmonth.status2.test.sample.domain;
 
 import com.godmonth.status2.annotations.Status;
+import com.godmonth.status2.test.sample.machine.trigger.SampleTrigger;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -22,7 +23,7 @@ public class SampleModel {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Status
+    @Status(triggerClass = SampleTrigger.class)
     @Enumerated(EnumType.STRING)
     private SampleStatus status;
 

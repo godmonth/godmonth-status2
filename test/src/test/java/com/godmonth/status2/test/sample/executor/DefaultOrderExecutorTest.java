@@ -2,8 +2,9 @@ package com.godmonth.status2.test.sample.executor;
 
 import com.godmonth.status2.advancer.intf.AdvancedResult;
 import com.godmonth.status2.advancer.intf.StatusAdvancer;
-import com.godmonth.status2.analysis.impl.model.SimpleBeanModelAnalysis;
-import com.godmonth.status2.analysis.impl.model.TypeFieldPredicate;
+import com.godmonth.status2.analysis.impl.SimpleBeanModelAnalysis;
+import com.godmonth.status2.analysis.impl.TypeFieldPredicate;
+import com.godmonth.status2.analysis.intf.ModelAnalysis;
 import com.godmonth.status2.executor.impl.DefaultOrderExecutor;
 import com.godmonth.status2.executor.intf.ExecutionRequest;
 import com.godmonth.status2.executor.intf.OrderExecutor;
@@ -23,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionOperations;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,9 +38,9 @@ public class DefaultOrderExecutorTest {
     @BeforeAll
     public static void prepare() {
         TypeFieldPredicate typeFieldPredicate = TypeFieldPredicate.builder().propertyName("type").expectedValue("test").build();
-        SimpleBeanModelAnalysis<SampleModel> analysis = new SimpleBeanModelAnalysis<>(SampleModel.class, "status", Arrays.asList(typeFieldPredicate));
+        final ModelAnalysis<SampleModel> modelAnalysis = SimpleBeanModelAnalysis.<SampleModel>builder().modelClass(SampleModel.class).statusPropertyName("status").statusClass(SampleStatus.class).triggerClass(SampleTrigger.class).build();
         DefaultOrderExecutor<SampleModel, Object, SampleTrigger> defaultOrderExecutor = new DefaultOrderExecutor<>();
-        defaultOrderExecutor.setModelAnalysis(analysis);
+        defaultOrderExecutor.setModelAnalysis(modelAnalysis);
         Map<Object, StatusAdvancer> advancerMap = new HashMap<>();
         advancerMap.put(SampleStatus.CREATED, advanceRequest -> new AdvancedResult<>(new TriggerBehavior<>(SampleTrigger.PAY)));
         defaultOrderExecutor.setAdvancerBindingMap(advancerMap);
@@ -50,7 +50,7 @@ public class DefaultOrderExecutorTest {
                 SampleConfigMap.INSTANCE);
 
         txStatusTransitor.setStatusTransitor(statusTransitor);
-        txStatusTransitor.setModelAnalysis(analysis);
+        txStatusTransitor.setModelAnalysis(modelAnalysis);
         Map<SampleStatus, StatusEntry> sampleStatusStatusEntryMap = Collections.singletonMap(SampleStatus.PAID, DefaultOrderExecutorTest::print);
         txStatusTransitor.setStatusEntryFunction(sampleStatusStatusEntryMap::get);
         txStatusTransitor.setModelMerger(sampleModel -> sampleModel);
