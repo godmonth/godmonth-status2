@@ -5,12 +5,6 @@
 			<pattern>%-4relative [%thread] %-5level %class - %msg%n</pattern>
 		</layout>
 	</appender>
-	<logger name="jdbc.sqlonly">
-		<level value="info" />
-	</logger>
-	<logger name="com.godmonth.util.cooler">
-		<level value="trace" />
-	</logger>
 	<root>
 		<level value="info" />
 		<appender-ref ref="STDOUT" />

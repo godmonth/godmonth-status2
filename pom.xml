@@ -4,13 +4,13 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.godmonth.status</groupId>
+    <groupId>com.godmonth.status2</groupId>
     <artifactId>status-parent</artifactId>
-    <version>0.5-SNAPSHOT</version>
-    <url>https://github.com/godmonth/godmonth-status</url>
+    <version>2.0-SNAPSHOT</version>
+    <url>https://github.com/godmonth/godmonth-status2</url>
     <packaging>pom</packaging>
-    <name>godmonth status</name>
-    <description>godmonth status</description>
+    <name>godmonth status2</name>
+    <description>godmonth status2</description>
 
     <modules>
         <module>annotations</module>
@@ -38,8 +38,8 @@
         </license>
     </licenses>
     <scm>
-        <connection>scm:git:git@github.com:godmonth/godmonth-status.git</connection>
-        <developerConnection>scm:git:git@github.com:godmonth/godmonth-status.git</developerConnection>
+        <connection>scm:git:git@github.com:godmonth/godmonth-status2.git</connection>
+        <developerConnection>scm:git:git@github.com:godmonth/godmonth-status2.git</developerConnection>
         <url>https://github.com/godmonth/godmonth-status</url>
         <tag>HEAD</tag>
     </scm>
