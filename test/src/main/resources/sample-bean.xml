@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:c="http://www.springframework.org/schema/c"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+    <!--不使用-->
+    <!--  <bean id="sampleModelAnalysis" class="com.godmonth.status.analysis.impl.model.SimpleBeanModelAnalysis"
+            p:modelClass="SampleModel" p:statusPropertyName="status">
+          <property name="predicateList">
+              <bean class="com.godmonth.status.analysis.impl.model.TypeFieldPredicate" p:propertyName="type"
+                    p:expectedValue="test"/>
+          </property>
+      </bean>
+-->
+
+    <bean id="sampleModelAnalysis" class="com.godmonth.status.analysis.impl.model.AnnotationBeanModelAnalysis"
+          c:_0="com.godmonth.status.test.sample.domain.SampleModel"/>
+    <bean id="sampleStateMachineAnalysis" class="com.godmonth.status.analysis.impl.sm.AnnotationStateMachineAnalysis"
+          c:_0-ref="sampleModelAnalysis"/>
+
+    <bean id="sampleModelExecutor" class="com.godmonth.status.executor.impl.OldDefaultOrderExecutor"
+          p:txStatusTransitor-ref="sampleModelStatusTransitor" p:modelAnalysis-ref="sampleModelAnalysis">
+        <property name="advancerBindingList">
+            <bean class="com.godmonth.status.builder.advancer.OldAdvancerConverter" factory-method="convert2Binding">
+                <constructor-arg>
+                    <list>
+                        <bean class="com.godmonth.status.test.sample.machine.advancer.PayAdvancer"/>
+                        <bean class="com.godmonth.status.test.sample.machine.advancer.CheckAdvancer"/>
+                    </list>
+                </constructor-arg>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="statusRepositoryStatusTransitor" abstract="true"
+          class="com.godmonth.status.transitor.tx.impl.TxStatusTransitorImpl"
+          p:transactionOperations-ref="transactionTemplate">
+        <property name="modelMerger">
+            <bean class="com.godmonth.status.transitor.tx.impl.jpa.EntityManagerMergerImpl" autowire="byType"/>
+        </property>
+    </bean>
+
+    <bean id="sampleModelStatusTransitor" parent="statusRepositoryStatusTransitor"
+          p:modelAnalysis-ref="sampleModelAnalysis">
+        <property name="statusTransitor">
+            <bean class="com.godmonth.status.transitor.core.impl.SimpleStatusTransitor">
+                <constructor-arg>
+                    <bean class="com.godmonth.status.builder.transitor.JsonDefinitionFactoryBean"
+                          p:stateMachineAnalysis-ref="sampleStateMachineAnalysis"
+                          p:resource="classpath:/sample-status.json"/>
+                </constructor-arg>
+            </bean>
+        </property>
+        <property name="statusEntryBindList">
+            <list>
+                <bean class="org.apache.commons.lang3.tuple.Pair" factory-method="of">
+                    <constructor-arg>
+                        <util:constant static-field="com.godmonth.status.test.sample.domain.SampleStatus.PAID"/>
+                    </constructor-arg>
+                    <constructor-arg>
+                        <bean class="com.godmonth.status.test.sample.machine.entry.EchoStatusEntry"/>
+                    </constructor-arg>
+                </bean>
+            </list>
+        </property>
+    </bean>
+
+
+</beans>

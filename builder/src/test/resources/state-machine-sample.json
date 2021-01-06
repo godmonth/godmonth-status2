@@ -1,0 +1,11 @@
+[
+	{
+		"status": "CREATED",
+		"triggers": [
+			{
+				"trigger": "PAY",
+				"nextStatus": "PAID"
+			}
+		]
+	}
+]

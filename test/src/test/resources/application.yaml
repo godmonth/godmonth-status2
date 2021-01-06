@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+    url: jdbc:log4jdbc:h2:mem:testdb
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.HSQLDialect
+        format_sql: false
+        show_sql: false
+        hbm2ddl:
+          auto: create-drop
+  db2:
+    driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+    jdbcUrl: jdbc:log4jdbc:h2:mem:db2
+  db3:
+    driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+    jdbcUrl: jdbc:log4jdbc:h2:mem:db3
+aaa:
+  bbb: ccc
+
+
