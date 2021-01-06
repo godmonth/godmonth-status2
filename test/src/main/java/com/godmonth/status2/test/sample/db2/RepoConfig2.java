@@ -26,9 +26,7 @@ import java.util.Map;
 
 @Configuration
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class})
-
-@EnableJpaRepositories(entityManagerFactoryRef = "e2", transactionManagerRef = "tm2", basePackages = "com.godmonth.status.test.sample.repo")
-//@EntityScan("com.godmonth.status.test.sample.domain")
+@EnableJpaRepositories(entityManagerFactoryRef = "e2", transactionManagerRef = "tm2", basePackages = "com.godmonth.status2.test.sample.repo")
 public class RepoConfig2 {
     @Bean("d2")
     @ConfigurationProperties(prefix = "spring.db2")

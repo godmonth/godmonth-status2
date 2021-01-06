@@ -27,7 +27,7 @@ import java.util.Map;
 @Configuration
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class})
 
-@EnableJpaRepositories(entityManagerFactoryRef = "e3", transactionManagerRef = "tm3", basePackages = "com.godmonth.status.test.sample.repo2")
+@EnableJpaRepositories(entityManagerFactoryRef = "e3", transactionManagerRef = "tm3", basePackages = "com.godmonth.status2.test.sample.repo2")
 public class RepoConfig3 {
     @Bean("d3")
     @ConfigurationProperties(prefix = "spring.db3")

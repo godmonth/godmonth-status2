@@ -25,15 +25,13 @@ public class AnnotationBeanModelAnalysis<MODEL> extends SimpleBeanModelAnalysis<
 
     @Builder(builderMethodName = "annoBuilder")
     public AnnotationBeanModelAnalysis(Class<MODEL> modelClass, @Singular("predicate") List<Predicate<MODEL>> predicateList) {
-        super();
         this.modelClass = modelClass;
         this.predicateList = predicateList;
 
         final Pair<Field, Status> pair = getStatusField(modelClass);
         this.statusPropertyName = pair.getLeft().getName();
-        this.statusClass = pair.getLeft().getClass();
+        this.statusClass = pair.getLeft().getType();
         this.triggerClass = pair.getRight().triggerClass();
-
     }
 
     private static Pair<Field, Status> getStatusField(Class modelClass) {
