@@ -46,7 +46,7 @@
     </bean>
 
     <bean id="statusRepositoryStatusTransitor" abstract="true"
-          class="com.godmonth.status2.transitor.tx.impl.TxStatusTransetStatusEntryBindingMapsitorImpl"
+          class="com.godmonth.status2.transitor.tx.impl.TxStatusTransitorImpl"
           p:transactionOperations-ref="transactionTemplate">
         <property name="modelMerger">
             <bean class="com.godmonth.status2.transitor.tx.impl.jpa.EntityManagerMergerImpl" autowire="byType"/>
