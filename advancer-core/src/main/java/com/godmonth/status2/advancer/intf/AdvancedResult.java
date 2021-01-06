@@ -35,7 +35,7 @@ public class AdvancedResult<MODEL, TRIGGER> {
      * 丢弃指令
      */
     private boolean dropInstruction;
-  
+
     /**
      * @param triggerBehavior
      */
@@ -49,7 +49,6 @@ public class AdvancedResult<MODEL, TRIGGER> {
      * @param triggerBehavior
      * @param nextOperation
      */
-    @Deprecated
     public AdvancedResult(TriggerBehavior<TRIGGER, MODEL> triggerBehavior, NextOperation nextOperation) {
         this.triggerBehavior = triggerBehavior;
         this.nextOperation = nextOperation;
