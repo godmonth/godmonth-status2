@@ -5,8 +5,6 @@ import com.godmonth.status2.annotations.utils.AnnotationValueUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.InvocationTargetException;
-
 /**
  * <p></p >
  *
@@ -15,14 +13,14 @@ import java.lang.reflect.InvocationTargetException;
 
 class AnnotationEnumUtilsTest {
     @Test
-    void t1() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    void t1() {
         StatusBinding annotation = T1.class.getAnnotation(StatusBinding.class);
         Object o = AnnotationValueUtils.parseEnumValue(annotation, "statusClass", "statusValue");
         Assertions.assertEquals("VV", o);
     }
 
     @Test
-    void t2() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    void t2() {
         StatusBinding annotation = T2.class.getAnnotation(StatusBinding.class);
         Object o = AnnotationValueUtils.parseEnumValue(annotation, "statusClass", "statusValue");
         Assertions.assertEquals(SampleStatus.S1, o);

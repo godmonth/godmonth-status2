@@ -1,22 +1,21 @@
 package com.godmonth.status2.test.sample.executor;
 
+import com.godmonth.status2.advancer.intf.AdvancedResult;
 import com.godmonth.status2.advancer.intf.StatusAdvancer;
 import com.godmonth.status2.analysis.impl.model.SimpleBeanModelAnalysis;
 import com.godmonth.status2.analysis.impl.model.TypeFieldPredicate;
-import com.godmonth.status2.executor.impl.OldDefaultOrderExecutor;
+import com.godmonth.status2.executor.impl.DefaultOrderExecutor;
 import com.godmonth.status2.executor.intf.ExecutionRequest;
 import com.godmonth.status2.executor.intf.OrderExecutor;
-import com.godmonth.status2.executor.intf.OrderExecutor2;
 import com.godmonth.status2.executor.intf.SyncResult;
 import com.godmonth.status2.test.sample.domain.SampleModel;
 import com.godmonth.status2.test.sample.domain.SampleStatus;
-import com.godmonth.status2.test.sample.machine.advancer.CheckAdvancer;
-import com.godmonth.status2.test.sample.machine.advancer.PayAdvancer;
 import com.godmonth.status2.test.sample.machine.trigger.SampleTrigger;
 import com.godmonth.status2.transitor.core.impl.SimpleStatusTransitor;
 import com.godmonth.status2.transitor.tx.impl.TxStatusTransitorImpl;
 import com.godmonth.status2.transitor.tx.intf.StatusEntry;
 import com.godmonth.status2.transitor.tx.intf.TransitedResult;
+import com.godmonth.status2.transitor.tx.intf.TriggerBehavior;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -34,19 +33,17 @@ public class DefaultOrderExecutorTest {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultOrderExecutorTest.class);
 
-    private static OrderExecutor<SampleModel, String> orderExecutor;
-    private static OrderExecutor2<SampleModel, String> orderExecutor2;
+    private static OrderExecutor<SampleModel, Object> orderExecutor;
 
     @BeforeAll
     public static void prepare() {
         TypeFieldPredicate typeFieldPredicate = TypeFieldPredicate.builder().propertyName("type").expectedValue("test").build();
         SimpleBeanModelAnalysis<SampleModel> analysis = new SimpleBeanModelAnalysis<>(SampleModel.class, "status", Arrays.asList(typeFieldPredicate));
-        OldDefaultOrderExecutor<SampleModel, String, SampleTrigger> defaultOrderExecutor = new OldDefaultOrderExecutor<>();
+        DefaultOrderExecutor<SampleModel, Object, SampleTrigger> defaultOrderExecutor = new DefaultOrderExecutor<>();
         defaultOrderExecutor.setModelAnalysis(analysis);
-        Map<SampleStatus, StatusAdvancer<SampleModel, String, SampleTrigger>> advancers = new HashMap<>();
-        advancers.put(SampleStatus.CREATED, new PayAdvancer());
-        advancers.put(SampleStatus.PAID, new CheckAdvancer());
-        defaultOrderExecutor.setAdvancerFunctions(advancers::get);
+        Map<Object, StatusAdvancer> advancerMap = new HashMap<>();
+        advancerMap.put(SampleStatus.CREATED, advanceRequest -> new AdvancedResult<>(new TriggerBehavior<>(SampleTrigger.PAY)));
+        defaultOrderExecutor.setAdvancerBindingMap(advancerMap);
 
         TxStatusTransitorImpl<SampleModel, SampleStatus, SampleTrigger> txStatusTransitor = new TxStatusTransitorImpl<>();
         SimpleStatusTransitor<SampleStatus, SampleTrigger> statusTransitor = new SimpleStatusTransitor<>(
@@ -61,7 +58,6 @@ public class DefaultOrderExecutorTest {
         defaultOrderExecutor.setTxStatusTransitor(txStatusTransitor);
 
         orderExecutor = defaultOrderExecutor;
-        orderExecutor2 = defaultOrderExecutor;
     }
 
     private static void print(TransitedResult transitedResult) {
@@ -73,17 +69,9 @@ public class DefaultOrderExecutorTest {
         SampleModel sampleModel = new SampleModel();
         sampleModel.setStatus(SampleStatus.CREATED);
         sampleModel.setType("test");
-        final com.godmonth.status2.advancer.intf.SyncResult<SampleModel, ?> execute = orderExecutor.execute(sampleModel, "eee", "fff");
+        SyncResult<SampleModel, ?> execute = orderExecutor.execute(ExecutionRequest.<SampleModel, Object>builder().model(sampleModel).instruction("eee").message("fff").build());
         Assertions.assertEquals(execute.getModel().getStatus(), SampleStatus.PAID);
     }
 
-    @Test
-    public void execute2() {
-        SampleModel sampleModel = new SampleModel();
-        sampleModel.setStatus(SampleStatus.CREATED);
-        sampleModel.setType("test");
-        final ExecutionRequest<SampleModel, String> request = ExecutionRequest.<SampleModel, String>builder().model(sampleModel).instruction("eee").message("fff").build();
-        final SyncResult<SampleModel, ?> execute = orderExecutor2.execute(request);
-        Assertions.assertEquals(execute.getModel().getStatus(), SampleStatus.CREATED);
-    }
+
 }

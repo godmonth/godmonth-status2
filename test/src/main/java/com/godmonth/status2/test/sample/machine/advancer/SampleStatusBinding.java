@@ -1,4 +1,4 @@
-package com.godmonth.status2.test.sample.machine.advancer2;
+package com.godmonth.status2.test.sample.machine.advancer;
 
 import com.godmonth.status2.test.sample.domain.SampleStatus;
 

@@ -35,11 +35,10 @@ public class AdvancedResult<MODEL, TRIGGER> {
      * 丢弃指令
      */
     private boolean dropInstruction;
-
+  
     /**
      * @param triggerBehavior
      */
-    @Deprecated
     public AdvancedResult(TriggerBehavior<TRIGGER, MODEL> triggerBehavior) {
         this.triggerBehavior = triggerBehavior;
         //必须写一次
@@ -54,34 +53,6 @@ public class AdvancedResult<MODEL, TRIGGER> {
     public AdvancedResult(TriggerBehavior<TRIGGER, MODEL> triggerBehavior, NextOperation nextOperation) {
         this.triggerBehavior = triggerBehavior;
         this.nextOperation = nextOperation;
-    }
-
-    /**
-     * @param triggerBehavior
-     * @param nextOperation
-     * @param dropInstruction
-     */
-    public AdvancedResult(TriggerBehavior<TRIGGER, MODEL> triggerBehavior, NextOperation nextOperation,
-                          boolean dropInstruction) {
-        this.triggerBehavior = triggerBehavior;
-        this.nextOperation = nextOperation;
-        this.dropInstruction = dropInstruction;
-    }
-
-    /**
-     * use setSyncData
-     *
-     * @param syncResult
-     */
-    @Deprecated
-    public void setSyncResult(SyncResult syncResult) {
-        if (syncResult != null) {
-            syncData = SyncData.builder().symbol(syncResult.getSymbol()).value(syncResult.getValue()).build();
-        } else {
-            syncData = null;
-        }
-        //必须写一次
-        nextOperation = NextOperation.ADVANCE;
     }
 
 }

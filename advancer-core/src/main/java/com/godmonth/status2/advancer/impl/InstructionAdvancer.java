@@ -1,23 +1,25 @@
 package com.godmonth.status2.advancer.impl;
 
+import com.godmonth.status2.advancer.intf.AdvanceRequest;
 import com.godmonth.status2.advancer.intf.AdvancedResult;
-import com.godmonth.status2.advancer.intf.StatusAdvancer2;
+import com.godmonth.status2.advancer.intf.StatusAdvancer;
+import com.godmonth.status2.annotations.binding.InstructionBinding;
+import lombok.Setter;
 import org.apache.commons.lang3.Validate;
 
 /**
- * @param <MODEL>
- * @param <INST>
- * @param <TRIGGER>
- * @deprecated use {@link StatusAdvancer2}
+ * 这种情况不用 {@link InstructionBinding}
  */
-@Deprecated
-public abstract class InstructionAdvancer<MODEL, INST, TRIGGER> extends AbstractAdvancer<MODEL, INST, TRIGGER> {
+public abstract class InstructionAdvancer<MODEL, INST, TRIGGER> implements StatusAdvancer<MODEL, INST, TRIGGER> {
+
+    @Setter
+    protected INST expectedInstruction;
 
     @Override
-    final public AdvancedResult<MODEL, TRIGGER> advance(MODEL model, INST instruction, Object message) {
-        Validate.notNull(instruction, "instruction is null");
-        Validate.isTrue(expectedInstruction == instruction, "expected instruction not equals input instruction.");
-        return doAdvance(model, message);
+    public AdvancedResult<MODEL, TRIGGER> advance(AdvanceRequest<MODEL, INST> advanceRequest) {
+        Validate.notNull(advanceRequest.getInstruction(), "instruction is null");
+        Validate.isTrue(expectedInstruction == advanceRequest.getInstruction(), "expected instruction not equals input instruction.");
+        return doAdvance(advanceRequest.getModel(), advanceRequest.getMessage());
     }
 
     protected abstract AdvancedResult<MODEL, TRIGGER> doAdvance(MODEL model, Object message);

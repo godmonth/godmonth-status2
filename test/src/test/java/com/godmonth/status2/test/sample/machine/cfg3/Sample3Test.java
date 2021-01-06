@@ -1,7 +1,7 @@
 package com.godmonth.status2.test.sample.machine.cfg3;
 
 import com.godmonth.status2.executor.intf.ExecutionRequest;
-import com.godmonth.status2.executor.intf.OrderExecutor2;
+import com.godmonth.status2.executor.intf.OrderExecutor;
 import com.godmonth.status2.executor.intf.SyncResult;
 import com.godmonth.status2.test.sample.db2.RepoConfig2;
 import com.godmonth.status2.test.sample.db3.RepoConfig3;
@@ -36,7 +36,7 @@ import java.util.Optional;
 public class Sample3Test {
 
     @Autowired
-    private OrderExecutor2<SampleModel, Object> sampleModelOrderExecutor;
+    private OrderExecutor<SampleModel, Object> sampleModelOrderExecutor;
 
     @Autowired
     private SampleModelRepository sampleModelRepository;

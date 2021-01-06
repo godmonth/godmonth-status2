@@ -2,7 +2,7 @@ package com.godmonth.status2.builder.advancer;
 
 import com.godmonth.status2.advancer.intf.AdvanceRequest;
 import com.godmonth.status2.advancer.intf.AdvancedResult;
-import com.godmonth.status2.advancer.intf.StatusAdvancer2;
+import com.godmonth.status2.advancer.intf.StatusAdvancer;
 import com.godmonth.status2.annotations.Advancer;
 import com.godmonth.status2.annotations.binding.ModelBinding;
 import com.godmonth.status2.annotations.binding.StatusBinding;
@@ -17,7 +17,7 @@ import com.godmonth.status2.builder.domain.SampleStatus;
 @Advancer
 @ModelBinding(SampleModel.class)
 @StatusBinding(statusClass = SampleStatus.class, statusValue = "CREATED")
-public class PayAdvancer implements StatusAdvancer2 {
+public class PayAdvancer implements StatusAdvancer {
 
     @Override
     public AdvancedResult advance(AdvanceRequest advanceRequest) {

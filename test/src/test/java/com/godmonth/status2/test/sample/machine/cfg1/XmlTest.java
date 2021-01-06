@@ -1,11 +1,12 @@
 package com.godmonth.status2.test.sample.machine.cfg1;
 
-import com.godmonth.status2.test.sample.db1.RepoConfig;
-import com.godmonth.status2.test.sample.repo.SampleModelRepository;
-import com.godmonth.status2.advancer.intf.SyncResult;
+import com.godmonth.status2.executor.intf.ExecutionRequest;
 import com.godmonth.status2.executor.intf.OrderExecutor;
+import com.godmonth.status2.executor.intf.SyncResult;
+import com.godmonth.status2.test.sample.db1.RepoConfig;
 import com.godmonth.status2.test.sample.domain.SampleModel;
 import com.godmonth.status2.test.sample.domain.SampleStatus;
+import com.godmonth.status2.test.sample.repo.SampleModelRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,8 +38,9 @@ public class XmlTest {
         SampleModel sampleModel = new SampleModel();
         sampleModel.setStatus(SampleStatus.CREATED);
         sampleModel.setType("test");
-        SampleModel sampleModel1 = sampleModelRepository.save(sampleModel);
-        SyncResult<SampleModel, ?> execute = sampleModelExecutor.execute(sampleModel1, "pay", "balance");
+        sampleModel = sampleModelRepository.save(sampleModel);
+        ExecutionRequest<SampleModel, Object> req = ExecutionRequest.<SampleModel, Object>builder().model(sampleModel).instruction("pay").message("balance").build();
+        SyncResult<SampleModel, ?> execute = sampleModelExecutor.execute(req);
         System.out.println(execute);
         Assertions.assertEquals(SampleStatus.PAID, execute.getModel().getStatus());
     }

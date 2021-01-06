@@ -1,12 +1,9 @@
 package com.godmonth.status2.advancer.intf;
 
 /**
- * 状态推进器
- *
  * @param <MODEL> MODEL
  * @author shenyue
  */
-@Deprecated
-public interface StatusAdvancer<MODEL, INST, TRIGGER> extends StatusAdvancer2<MODEL, INST, TRIGGER> {
-    Object getKey();
+public interface StatusAdvancer<MODEL, INST, TRIGGER> {
+    AdvancedResult<MODEL, TRIGGER> advance(AdvanceRequest<MODEL, INST> advanceRequest);
 }

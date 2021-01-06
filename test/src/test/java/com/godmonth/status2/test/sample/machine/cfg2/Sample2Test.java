@@ -1,7 +1,7 @@
 package com.godmonth.status2.test.sample.machine.cfg2;
 
 import com.godmonth.status2.executor.intf.ExecutionRequest;
-import com.godmonth.status2.executor.intf.OrderExecutor2;
+import com.godmonth.status2.executor.intf.OrderExecutor;
 import com.godmonth.status2.executor.intf.SyncResult;
 import com.godmonth.status2.test.sample.db1.RepoConfig;
 import com.godmonth.status2.test.sample.domain.SampleModel;
@@ -28,7 +28,7 @@ import org.springframework.context.annotation.ComponentScan;
 public class Sample2Test {
 
     @Autowired
-    private OrderExecutor2<SampleModel, Object> sampleModelOrderExecutor;
+    private OrderExecutor<SampleModel, Object> sampleModelOrderExecutor;
 
     @Autowired
     private SampleModelRepository sampleModelRepository;

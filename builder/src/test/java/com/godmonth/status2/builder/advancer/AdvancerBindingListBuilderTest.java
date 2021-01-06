@@ -1,6 +1,6 @@
 package com.godmonth.status2.builder.advancer;
 
-import com.godmonth.status2.advancer.intf.StatusAdvancer2;
+import com.godmonth.status2.advancer.intf.StatusAdvancer;
 import com.godmonth.status2.builder.domain.SampleModel;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
@@ -16,13 +16,13 @@ import java.util.List;
  * @author shenyue
  */
 class AdvancerBindingListBuilderTest {
-    private StatusAdvancer2 statusAdvancer = new PayAdvancer();
+    private StatusAdvancer statusAdvancer = new PayAdvancer();
 
     @Test
     void name() throws IOException, ClassNotFoundException {
         AutowireCapableBeanFactory factory = Mockito.mock(AutowireCapableBeanFactory.class);
         Mockito.when(factory.autowire(Mockito.same(PayAdvancer.class), Mockito.anyInt(), Mockito.anyBoolean())).thenReturn(statusAdvancer);
-        List<Pair<Object, StatusAdvancer2>> build = AdvancerBindingListBuilder.builder().autowireCapableBeanFactory(factory).modelClass(SampleModel.class).packageName("com.godmonth.status.builder.advancer").build();
+        List<Pair<Object, StatusAdvancer>> build = AdvancerBindingListBuilder.builder().autowireCapableBeanFactory(factory).modelClass(SampleModel.class).packageName("com.godmonth.status.builder.advancer").build();
         System.out.println(build);
     }
 
