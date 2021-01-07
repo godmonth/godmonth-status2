@@ -25,7 +25,7 @@
             <map>
                 <entry>
                     <key>
-                        <util:constant static-field="com.godmonth.status2.test.sample.domain.SampleStatus.PAID"/>
+                        <util:constant static-field="com.godmonth.status2.test.sample.domain.SampleStatus.CREATED"/>
                     </key>
                     <bean class="com.godmonth.status2.test.sample.machine.advancer.PayAdvancer"/>
                 </entry>

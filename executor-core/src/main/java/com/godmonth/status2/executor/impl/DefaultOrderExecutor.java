@@ -113,7 +113,6 @@ public class DefaultOrderExecutor<MODEL, INST, TRIGGER> implements OrderExecutor
             return SyncResult.<MODEL, Object>builder().model(model).build();
         } else {
             return SyncResult.<MODEL, Object>builder().model(model).symbol(syncData.getSymbol()).value(syncData.getValue()).build();
-
         }
     }
 
