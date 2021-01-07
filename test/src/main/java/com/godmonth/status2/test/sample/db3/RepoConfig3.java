@@ -26,7 +26,6 @@ import java.util.Map;
 
 @Configuration
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class})
-
 @EnableJpaRepositories(entityManagerFactoryRef = "e3", transactionManagerRef = "tm3", basePackages = "com.godmonth.status2.test.sample.repo2")
 public class RepoConfig3 {
     @Bean("d3")
@@ -43,7 +42,7 @@ public class RepoConfig3 {
         EntityManagerFactoryBuilder builder = new EntityManagerFactoryBuilder(vendorAdapter, jpaProperties.getProperties(), null);
         HibernateProperties hibernateProperties = new HibernateProperties();
         Map<String, Object> properties = hibernateProperties.determineHibernateProperties(jpaProperties.getProperties(), new HibernateSettings());
-        return builder.dataSource(userDataSource).properties(properties).packages("com.godmonth.status.test.sample.domain").build();
+        return builder.dataSource(userDataSource).properties(properties).packages("com.godmonth.status2.test.sample.domain").build();
     }
 
     @Bean("tm3")

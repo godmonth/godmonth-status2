@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.function.Function;
 
+import static com.godmonth.status2.test.sample.machine.cfg2.SampleOrderExecutorConfig2.KEY_BINDING;
+
 /**
  * <p></p >
  *
@@ -57,7 +59,7 @@ public class SampleOrderExecutorConfig3 {
      */
     @Bean
     public OrderExecutor<SampleModel, Object> sampleModelOrderExecutor(AutowireCapableBeanFactory beanFactory, @Qualifier("sampleModelAnalysis") ModelAnalysis sampleModelAnalysis, @Qualifier("sampleStatusTxStatusTransitor") TxStatusTransitor txStatusTransitor) throws IOException, ClassNotFoundException {
-        List<Pair<Object, StatusAdvancer>> pairList = AdvancerBindingListBuilder.builder().autowireCapableBeanFactory(beanFactory).modelClass(SampleModel.class).packageName("com.godmonth.status2.test.sample.machine.advancer").build();
+        List<Pair<Object, StatusAdvancer>> pairList = AdvancerBindingListBuilder.builder().autowireCapableBeanFactory(beanFactory).modelClass(SampleModel.class).packageName("com.godmonth.status2.test.sample.machine.advancer").keyFinder(KEY_BINDING).build();
         OrderExecutor<SampleModel, Object> oe = DefaultOrderExecutor.<SampleModel, Object, Object>builder().modelAnalysis(sampleModelAnalysis).advancerBindingList(pairList).txStatusTransitor(txStatusTransitor).build();
         return oe;
     }
@@ -65,7 +67,7 @@ public class SampleOrderExecutorConfig3 {
 
     @Bean
     public TxStatusTransitor sampleStatusTxStatusTransitor(@Qualifier("e2") EntityManager entityManager, @Qualifier("tt2") TransactionOperations transactionOperations, @Qualifier("sampleStatusTransitor") StatusTransitor statusTransitor, @Qualifier("sampleModelAnalysis") ModelAnalysis sampleModelAnalysis, AutowireCapableBeanFactory beanFactory) throws IOException, ClassNotFoundException {
-        List<Pair<Object, StatusEntry>> pairList = StatusEntryBindingListBuilder.<SampleStatus>builder().autowireCapableBeanFactory(beanFactory).packageName("com.godmonth.status2.test.sample.machine.entry").build();
+        List<Pair<Object, StatusEntry>> pairList = StatusEntryBindingListBuilder.<SampleStatus>builder().autowireCapableBeanFactory(beanFactory).packageName("com.godmonth.status2.test.sample.machine.entry").keyFinder(KEY_BINDING).build();
         return TxStatusTransitorImpl.builder().modelMerger(entityManager::merge).transactionOperations(transactionOperations).modelAnalysis(sampleModelAnalysis).statusTransitor(statusTransitor).statusEntryBindList(pairList).build();
     }
 

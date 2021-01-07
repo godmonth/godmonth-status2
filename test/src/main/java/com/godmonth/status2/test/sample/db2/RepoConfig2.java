@@ -42,7 +42,7 @@ public class RepoConfig2 {
         EntityManagerFactoryBuilder builder = new EntityManagerFactoryBuilder(vendorAdapter, jpaProperties.getProperties(), null);
         HibernateProperties hibernateProperties = new HibernateProperties();
         Map<String, Object> properties = hibernateProperties.determineHibernateProperties(jpaProperties.getProperties(), new HibernateSettings());
-        return builder.dataSource(userDataSource).properties(properties).packages("com.godmonth.status.test.sample.domain").build();
+        return builder.dataSource(userDataSource).properties(properties).packages("com.godmonth.status2.test.sample.domain").build();
     }
 
     @Bean("tm2")
