@@ -2,11 +2,10 @@ package com.godmonth.status2.test.sample.machine.cfg2;
 
 import com.godmonth.status2.advancer.intf.StatusAdvancer;
 import com.godmonth.status2.analysis.impl.AnnotationBeanModelAnalysis;
+import com.godmonth.status2.analysis.impl.AnnotationField;
 import com.godmonth.status2.analysis.impl.TypeFieldPredicate;
-import com.godmonth.status2.analysis.intf.ModelAnalysis;
+import com.godmonth.status2.analysis.intf.StateMachineAnalysis;
 import com.godmonth.status2.builder.advancer.AdvancerBindingListBuilder;
-import com.godmonth.status2.builder.binding.AnnotationField;
-import com.godmonth.status2.builder.binding.BindingKeyUtils;
 import com.godmonth.status2.builder.entry.StatusEntryBindingListBuilder;
 import com.godmonth.status2.builder.transitor.JsonDefinitionBuilder;
 import com.godmonth.status2.executor.impl.DefaultOrderExecutor;
@@ -17,7 +16,6 @@ import com.godmonth.status2.test.sample.machine.advancer.SampleStatusBinding;
 import com.godmonth.status2.test.sample.machine.inst.SampleInstructionBinding;
 import com.godmonth.status2.test.sample.machine.trigger.SampleTrigger;
 import com.godmonth.status2.transitor.core.impl.SimpleStatusTransitor;
-import com.godmonth.status2.transitor.core.intf.StatusTransitor;
 import com.godmonth.status2.transitor.tx.impl.TxStatusTransitorImpl;
 import com.godmonth.status2.transitor.tx.intf.StatusEntry;
 import com.godmonth.status2.transitor.tx.intf.TxStatusTransitor;
@@ -45,13 +43,12 @@ import java.util.function.Function;
 @Configuration
 public class SampleOrderExecutorConfig2 {
 
-    private static AnnotationField sampleStatusBindingField = AnnotationField.builder().annoClass(SampleStatusBinding.class).build();
-    private static AnnotationField samplInstBindingField = AnnotationField.builder().annoClass(SampleInstructionBinding.class).build();
-    public static Function<Class, Object> KEY_BINDING = componentClass -> BindingKeyUtils.getBindingKey(componentClass, sampleStatusBindingField, samplInstBindingField);
-
     @Bean
-    public ModelAnalysis<SampleModel> sampleModelAnalysis() {
-        return AnnotationBeanModelAnalysis.<SampleModel>annoBuilder().modelClass(SampleModel.class).predicate(TypeFieldPredicate.builder().propertyName("type").expectedValue("test").build()).build();
+    public StateMachineAnalysis<SampleModel> sampleStateMachineAnalysis() {
+        final AnnotationBeanModelAnalysis modelAnalysis = AnnotationBeanModelAnalysis.<SampleModel>annoBuilder().modelClass(SampleModel.class).predicate(TypeFieldPredicate.builder().propertyName("type").expectedValue("test").build()).build();
+        AnnotationField sampleStatusBindingField = AnnotationField.builder().annoClass(SampleStatusBinding.class).build();
+        AnnotationField samplInstBindingField = AnnotationField.builder().annoClass(SampleInstructionBinding.class).build();
+        return StateMachineAnalysis.<SampleModel>builder().modelAnalysis(modelAnalysis).statusBindingField(sampleStatusBindingField).instBindingField(samplInstBindingField).build();
     }
 
     /**
@@ -64,10 +61,10 @@ public class SampleOrderExecutorConfig2 {
      * @throws ClassNotFoundException
      */
     @Bean
-    public OrderExecutor<SampleModel, Object> sampleModelOrderExecutor(AutowireCapableBeanFactory beanFactory, @Qualifier("sampleModelAnalysis") ModelAnalysis sampleModelAnalysis, @Qualifier("sampleStatusTxStatusTransitor") TxStatusTransitor txStatusTransitor) throws IOException, ClassNotFoundException {
-        List<Pair<Object, StatusAdvancer>> advancerBindingList = AdvancerBindingListBuilder.builder().autowireCapableBeanFactory(beanFactory).modelClass(SampleModel.class).packageName("com.godmonth.status2.test.sample.machine.advancer").keyFinder(KEY_BINDING).build();
+    public OrderExecutor<SampleModel, Object> sampleModelOrderExecutor(AutowireCapableBeanFactory beanFactory, @Qualifier("sampleStateMachineAnalysis") StateMachineAnalysis sampleStateMachineAnalysis, @Qualifier("sampleStatusTxStatusTransitor") TxStatusTransitor txStatusTransitor) throws IOException, ClassNotFoundException {
+        List<Pair<Object, StatusAdvancer>> advancerBindingList = AdvancerBindingListBuilder.builder().autowireCapableBeanFactory(beanFactory).modelClass(SampleModel.class).packageName("com.godmonth.status2.test.sample.machine.advancer").bindingKeyFunction(sampleStateMachineAnalysis.getBindingKeyFunction()).build();
         //advancerBindingList.add(xxx);增加你需要定制的推进器
-        return DefaultOrderExecutor.builder().modelAnalysis(sampleModelAnalysis).advancerBindingList(advancerBindingList).txStatusTransitor(txStatusTransitor).build();
+        return DefaultOrderExecutor.builder().modelAnalysis(sampleStateMachineAnalysis.getModelAnalysis()).advancerBindingList(advancerBindingList).txStatusTransitor(txStatusTransitor).build();
     }
 
     /**
@@ -75,23 +72,19 @@ public class SampleOrderExecutorConfig2 {
      *
      * @param entityManager
      * @param transactionOperations
-     * @param statusTransitor
      * @param beanFactory
      * @return
      * @throws IOException
      * @throws ClassNotFoundException
      */
     @Bean
-    public TxStatusTransitor sampleStatusTxStatusTransitor(EntityManager entityManager, TransactionOperations transactionOperations, @Qualifier("sampleStatusTransitor") StatusTransitor statusTransitor, @Qualifier("sampleModelAnalysis") ModelAnalysis sampleModelAnalysis, AutowireCapableBeanFactory beanFactory) throws IOException, ClassNotFoundException {
-        List<Pair<Object, StatusEntry>> pairList = StatusEntryBindingListBuilder.builder().autowireCapableBeanFactory(beanFactory).packageName("com.godmonth.status2.test.sample.machine.entry").keyFinder(KEY_BINDING).build();
+    public TxStatusTransitor sampleStatusTxStatusTransitor(AutowireCapableBeanFactory beanFactory, EntityManager entityManager, TransactionOperations transactionOperations, @Qualifier("sampleStateMachineAnalysis") StateMachineAnalysis sampleStateMachineAnalysis, @Value("classpath:/sample-status.json") Resource configResource) throws IOException, ClassNotFoundException {
+        Function<SampleStatus, Function<SampleTrigger, SampleStatus>> function = JsonDefinitionBuilder.<SampleStatus, SampleTrigger>builder().resource(configResource).statusClass(sampleStateMachineAnalysis.getModelAnalysis().getStatusClass()).triggerClass(sampleStateMachineAnalysis.getModelAnalysis().getTriggerClass()).build();
+        final SimpleStatusTransitor simpleStatusTransitor = new SimpleStatusTransitor(function);
+        List<Pair<Object, StatusEntry>> pairList = StatusEntryBindingListBuilder.builder().autowireCapableBeanFactory(beanFactory).packageName("com.godmonth.status2.test.sample.machine.entry").bindingKeyFunction(sampleStateMachineAnalysis.getBindingKeyFunction()).build();
         //statusEntryBindList.add(vvv);加你需要定制的入口回调
-        return TxStatusTransitorImpl.builder().modelMerger(entityManager::merge).transactionOperations(transactionOperations).modelAnalysis(sampleModelAnalysis).statusTransitor(statusTransitor).statusEntryBindList(pairList).build();
+        return TxStatusTransitorImpl.builder().modelMerger(entityManager::merge).transactionOperations(transactionOperations).modelAnalysis(sampleStateMachineAnalysis.getModelAnalysis()).statusTransitor(simpleStatusTransitor).statusEntryBindList(pairList).build();
     }
 
-    @Bean
-    public StatusTransitor<SampleStatus, SampleTrigger> sampleStatusTransitor(@Value("classpath:/sample-status.json") Resource configResource, @Qualifier("sampleModelAnalysis") ModelAnalysis sampleModelAnalysis) throws IOException {
-        Function<SampleStatus, Function<SampleTrigger, SampleStatus>> function = JsonDefinitionBuilder.<SampleStatus, SampleTrigger>builder().resource(configResource).statusClass(sampleModelAnalysis.getStatusClass()).triggerClass(sampleModelAnalysis.getTriggerClass()).build();
-        return new SimpleStatusTransitor(function);
-    }
 
 }

@@ -19,4 +19,5 @@ public interface ModelAnalysis<MODEL> {
     <STATUS> void setStatus(MODEL model, STATUS value);
 
     String getStatusPropertyName();
+
 }

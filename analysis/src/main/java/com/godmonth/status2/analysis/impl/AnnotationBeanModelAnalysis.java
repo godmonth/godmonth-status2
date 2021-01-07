@@ -9,6 +9,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -18,6 +19,9 @@ import java.util.function.Predicate;
  */
 @ToString(callSuper = true)
 public class AnnotationBeanModelAnalysis<MODEL> extends SimpleBeanModelAnalysis<MODEL> {
+
+    protected Function<Class, Object> bindingKeyFunction;
+
 
     public AnnotationBeanModelAnalysis(Class<MODEL> modelClass) {
         this(modelClass, null);
@@ -44,5 +48,6 @@ public class AnnotationBeanModelAnalysis<MODEL> extends SimpleBeanModelAnalysis<
         }
         throw new IllegalArgumentException("statusPropertyName is null.");
     }
+
 
 }

@@ -1,5 +1,6 @@
 package com.godmonth.status2.builder.binding;
 
+import com.godmonth.status2.analysis.impl.BindingKeyUtils;
 import com.godmonth.status2.annotations.binding.ModelBinding;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
@@ -27,9 +28,9 @@ import java.util.function.Predicate;
 @Slf4j
 public class BindingListBuilder {
     @Builder
-    private static <T> List<Pair<Object, T>> build(ClassLoader classLoader, @NonNull @Singular Set<String> packageNames, Class enableAnnotationClass, Class ancestorClass, Class modelClass, Predicate<Class> predicate, Function<Class, Object> keyFinder, @NonNull AutowireCapableBeanFactory autowireCapableBeanFactory) throws IOException, ClassNotFoundException {
+    private static <T> List<Pair<Object, T>> build(ClassLoader classLoader, @NonNull @Singular Set<String> packageNames, Class enableAnnotationClass, Class ancestorClass, Class modelClass, Predicate<Class> predicate, Function<Class, Object> bindingKeyFunction, @NonNull AutowireCapableBeanFactory autowireCapableBeanFactory) throws IOException, ClassNotFoundException {
         Validate.notEmpty(packageNames, "packageNames is empty");
-        keyFinder = keyFinder != null ? keyFinder : BindingKeyUtils::getBindingKey;
+        bindingKeyFunction = bindingKeyFunction != null ? bindingKeyFunction : BindingKeyUtils::getBindingKey;
         List<Pair<Object, T>> list = new ArrayList<>();
         ClassPath classPath = ClassPath.from(classLoader != null ? classLoader : ClassLoader.getSystemClassLoader());
         for (String packageName : packageNames) {
@@ -60,7 +61,7 @@ public class BindingListBuilder {
                     continue;
                 }
 
-                Pair<Object, T> pair = createByAnnotation(aClass, autowireCapableBeanFactory, keyFinder);
+                Pair<Object, T> pair = createByAnnotation(aClass, autowireCapableBeanFactory, bindingKeyFunction);
                 if (pair != null) {
                     list.add(pair);
                 }
@@ -70,8 +71,8 @@ public class BindingListBuilder {
         return list;
     }
 
-    public static <T> Pair<Object, T> createByAnnotation(Class aClass, AutowireCapableBeanFactory autowireCapableBeanFactory, Function<Class, Object> keyFinder) {
-        Object key = keyFinder.apply(aClass);
+    public static <T> Pair<Object, T> createByAnnotation(Class aClass, AutowireCapableBeanFactory autowireCapableBeanFactory, Function<Class, Object> bindingKeyFunction) {
+        Object key = bindingKeyFunction.apply(aClass);
         if (key != null) {
             T component = (T) autowireCapableBeanFactory.autowire(aClass, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
             if (component != null) {

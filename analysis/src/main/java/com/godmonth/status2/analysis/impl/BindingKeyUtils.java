@@ -1,4 +1,4 @@
-package com.godmonth.status2.builder.binding;
+package com.godmonth.status2.analysis.impl;
 
 import com.godmonth.status2.annotations.binding.InstructionBinding;
 import com.godmonth.status2.annotations.binding.StatusBinding;
