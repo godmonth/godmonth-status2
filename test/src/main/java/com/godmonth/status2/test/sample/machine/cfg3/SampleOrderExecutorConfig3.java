@@ -57,7 +57,7 @@ public class SampleOrderExecutorConfig3 {
      */
     @Bean
     public OrderExecutor<SampleModel, Object> sampleModelOrderExecutor(AutowireCapableBeanFactory beanFactory, @Qualifier("sampleModelAnalysis") ModelAnalysis sampleModelAnalysis, @Qualifier("sampleStatusTxStatusTransitor") TxStatusTransitor txStatusTransitor) throws IOException, ClassNotFoundException {
-        List<Pair<Object, StatusAdvancer>> pairList = AdvancerBindingListBuilder.builder().autowireCapableBeanFactory(beanFactory).modelClass(SampleModel.class).packageName("com.godmonth.status.test.sample.machine.advancer2").build();
+        List<Pair<Object, StatusAdvancer>> pairList = AdvancerBindingListBuilder.builder().autowireCapableBeanFactory(beanFactory).modelClass(SampleModel.class).packageName("com.godmonth.status2.test.sample.machine.advancer").build();
         OrderExecutor<SampleModel, Object> oe = DefaultOrderExecutor.<SampleModel, Object, Object>builder().modelAnalysis(sampleModelAnalysis).advancerBindingList(pairList).txStatusTransitor(txStatusTransitor).build();
         return oe;
     }
@@ -65,7 +65,7 @@ public class SampleOrderExecutorConfig3 {
 
     @Bean
     public TxStatusTransitor sampleStatusTxStatusTransitor(@Qualifier("e2") EntityManager entityManager, @Qualifier("tt2") TransactionOperations transactionOperations, @Qualifier("sampleStatusTransitor") StatusTransitor statusTransitor, @Qualifier("sampleModelAnalysis") ModelAnalysis sampleModelAnalysis, AutowireCapableBeanFactory beanFactory) throws IOException, ClassNotFoundException {
-        List<Pair<Object, StatusEntry>> pairList = StatusEntryBindingListBuilder.<SampleStatus>builder().autowireCapableBeanFactory(beanFactory).packageName("com.godmonth.status.test.sample.machine.entry2").build();
+        List<Pair<Object, StatusEntry>> pairList = StatusEntryBindingListBuilder.<SampleStatus>builder().autowireCapableBeanFactory(beanFactory).packageName("com.godmonth.status2.test.sample.machine.entry").build();
         return TxStatusTransitorImpl.builder().modelMerger(entityManager::merge).transactionOperations(transactionOperations).modelAnalysis(sampleModelAnalysis).statusTransitor(statusTransitor).statusEntryBindList(pairList).build();
     }
 
