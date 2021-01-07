@@ -42,9 +42,9 @@ public class Sample2Test {
         {
             ExecutionRequest<SampleModel, Object> req = ExecutionRequest.<SampleModel, Object>builder().model(sampleModel).instruction("pay").message("balance").build();
             SyncResult<SampleModel, ?> execute = sampleModelOrderExecutor.execute(req);
-            System.out.println(execute);
-            Assertions.assertEquals(SampleStatus.PAID, execute.getModel().getStatus());
             sampleModel = execute.getModel();
+            System.out.println(execute);
+            Assertions.assertEquals(SampleStatus.PAID, sampleModel.getStatus());
         }
         {
             ExecutionRequest<SampleModel, Object> req = ExecutionRequest.<SampleModel, Object>builder().model(sampleModel).instruction(SampleInstruction.DELIVER).message("yunda").build();
