@@ -2,9 +2,11 @@ package com.godmonth.status2.test.sample.machine.cfg2up1;
 
 import com.godmonth.status2.executor.intf.OrderExecutor;
 import com.godmonth.status2.test.sample.db1.RepoConfig;
+import com.godmonth.status2.test.sample.domain.SampleModel;
+import com.godmonth.status2.test.sample.machine.cfg2.Sample2Test;
+import com.godmonth.status2.test.sample.repo.SampleModelRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureDataJpa;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,15 +21,15 @@ import org.springframework.context.annotation.ComponentScan;
 @AutoConfigureDataJpa
 @SpringBootTest(classes = {RepoConfig.class, OEConfig.class})
 @EnableAutoConfiguration
-public class BootTest {
+public class Sample2Up1Test {
     @Autowired
-    private ConfigurableListableBeanFactory beanFactory;
+    private OrderExecutor<SampleModel, Object> sampleModelOrderExecutor;
+
     @Autowired
-    private OrderExecutor orderExecutor;
+    private SampleModelRepository sampleModelRepository;
 
     @Test
     void name() {
-        System.out.println(orderExecutor);
-
+        Sample2Test.test(sampleModelRepository, sampleModelOrderExecutor);
     }
 }

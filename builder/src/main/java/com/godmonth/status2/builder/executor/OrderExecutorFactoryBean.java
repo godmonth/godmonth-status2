@@ -27,7 +27,6 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.transaction.support.TransactionOperations;
 
 import javax.persistence.EntityManager;
-import java.awt.image.SampleModel;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -135,8 +134,8 @@ public class OrderExecutorFactoryBean implements FactoryBean<OrderExecutor>, App
      * @throws IOException
      * @throws ClassNotFoundException
      */
-    private com.godmonth.status2.executor.intf.OrderExecutor<SampleModel, Object> orderExecutor(AutowireCapableBeanFactory beanFactory, StateMachineAnalysis machineAnalysis, TxStatusTransitor txStatusTransitor, Set<String> advancerPacakgeNames) throws IOException, ClassNotFoundException {
-        List<Pair<Object, StatusAdvancer>> advancerBindingList = AdvancerBindingListBuilder.builder().autowireCapableBeanFactory(beanFactory).modelClass(SampleModel.class).packageNames(advancerPacakgeNames).bindingKeyFunction(machineAnalysis.getBindingKeyFunction()).build();
+    private com.godmonth.status2.executor.intf.OrderExecutor orderExecutor(AutowireCapableBeanFactory beanFactory, StateMachineAnalysis machineAnalysis, TxStatusTransitor txStatusTransitor, Set<String> advancerPacakgeNames) throws IOException, ClassNotFoundException {
+        List<Pair<Object, StatusAdvancer>> advancerBindingList = AdvancerBindingListBuilder.builder().autowireCapableBeanFactory(beanFactory).modelClass(machineAnalysis.getModelAnalysis().getModelClass()).packageNames(advancerPacakgeNames).bindingKeyFunction(machineAnalysis.getBindingKeyFunction()).build();
         //advancerBindingList.add(xxx);增加你需要定制的推进器
         return DefaultOrderExecutor.builder().modelAnalysis(machineAnalysis.getModelAnalysis()).advancerBindingList(advancerBindingList).txStatusTransitor(txStatusTransitor).build();
     }
