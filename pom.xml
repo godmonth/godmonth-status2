@@ -21,8 +21,8 @@
         <module>advancer-core</module>
         <module>executor-core</module>
         <module>builder</module>
-        <module>bom</module>
         <module>test</module>
+        <module>bom</module>
 
     </modules>
     <developers>
