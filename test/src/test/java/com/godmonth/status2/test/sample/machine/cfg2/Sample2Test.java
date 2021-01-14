@@ -6,6 +6,7 @@ import com.godmonth.status2.executor.intf.SyncResult;
 import com.godmonth.status2.test.sample.db1.RepoConfig;
 import com.godmonth.status2.test.sample.domain.SampleModel;
 import com.godmonth.status2.test.sample.domain.SampleStatus;
+import com.godmonth.status2.test.sample.machine.cfg2up1.OEConfig;
 import com.godmonth.status2.test.sample.machine.inst.SampleInstruction;
 import com.godmonth.status2.test.sample.repo.SampleModelRepository;
 import org.junit.jupiter.api.Assertions;
@@ -15,6 +16,8 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureDataJpa;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
+
+import javax.persistence.EntityManager;
 
 /**
  * <p></p >
@@ -33,8 +36,12 @@ public class Sample2Test {
     @Autowired
     private SampleModelRepository sampleModelRepository;
 
+    @Autowired
+    private EntityManager entityManager;
+
     @Test
     void name() {
+        System.out.println(entityManager);
         SampleModel sampleModel = new SampleModel();
         sampleModel.setStatus(SampleStatus.CREATED);
         sampleModel.setType("test");

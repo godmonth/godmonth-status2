@@ -45,7 +45,7 @@ public class SampleOrderExecutorConfig2 {
 
     @Bean
     public StateMachineAnalysis<SampleModel> sampleStateMachineAnalysis() {
-        final AnnotationBeanModelAnalysis modelAnalysis = AnnotationBeanModelAnalysis.<SampleModel>annoBuilder().modelClass(SampleModel.class).predicate(TypeFieldPredicate.builder().propertyName("type").expectedValue("test").build()).build();
+        AnnotationBeanModelAnalysis modelAnalysis = AnnotationBeanModelAnalysis.<SampleModel>annoBuilder().modelClass(SampleModel.class).predicate(TypeFieldPredicate.builder().propertyName("type").expectedValue("test").build()).build();
         AnnotationField sampleStatusBindingField = AnnotationField.builder().annoClass(SampleStatusBinding.class).build();
         AnnotationField samplInstBindingField = AnnotationField.builder().annoClass(SampleInstructionBinding.class).build();
         return StateMachineAnalysis.<SampleModel>builder().modelAnalysis(modelAnalysis).statusBindingField(sampleStatusBindingField).instBindingField(samplInstBindingField).build();
