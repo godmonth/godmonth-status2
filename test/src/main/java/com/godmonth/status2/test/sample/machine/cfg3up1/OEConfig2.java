@@ -7,8 +7,6 @@ import com.godmonth.status2.builder.executor.OrderExecutor;
 import com.godmonth.status2.test.sample.domain.SampleModel;
 import com.godmonth.status2.test.sample.machine.advancer.SampleStatusBinding;
 import com.godmonth.status2.test.sample.machine.inst.SampleInstructionBinding;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -18,8 +16,7 @@ import org.springframework.context.annotation.Configuration;
  * @author shenyue
  */
 @Configuration
-@OrderExecutor(beanName = "orderExecutor", stateMachineDefinitionResource = "classpath:/sample-status.json")
-@AutoConfigureAfter(HibernateJpaAutoConfiguration.class)
+@OrderExecutor(beanName = "orderExecutor", stateMachineDefinitionResource = "classpath:/sample-status.json", advancerBasePackages = "com.godmonth.status2.test.sample.machine.advancer", entryBasePackages = "com.godmonth.status2.test.sample.machine.entry", transactionOperationsRef = "tt2", entityManagerRef = "e2")
 public class OEConfig2 {
     @Bean
     StateMachineAnalysis stateMachineAnalysis() {

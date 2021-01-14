@@ -27,6 +27,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.transaction.support.TransactionOperations;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -65,7 +66,13 @@ public class OrderExecutorFactoryBean implements FactoryBean<OrderExecutor>, App
         final String entityManagerRef = (String) annotationAttributes.get("entityManagerRef");
         EntityManager entityManager = null;
         if (StringUtils.isNotBlank(entityManagerRef)) {
-            entityManager = (EntityManager) applicationContext.getBean(entityManagerRef);
+            final Object bean = applicationContext.getBean(entityManagerRef);
+            if (bean instanceof EntityManager) {
+                entityManager = (EntityManager) bean;
+            } else if (bean instanceof EntityManagerFactory) {
+                EntityManagerFactory entityManagerFactory = (EntityManagerFactory) bean;
+                entityManager = entityManagerFactory.createEntityManager();
+            }
         } else {
             entityManager = applicationContext.getBean(EntityManager.class);
         }

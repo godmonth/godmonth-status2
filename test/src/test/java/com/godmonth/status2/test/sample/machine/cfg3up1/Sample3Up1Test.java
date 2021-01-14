@@ -1,4 +1,4 @@
-package com.godmonth.status2.test.sample.machine.cfg3;
+package com.godmonth.status2.test.sample.machine.cfg3up1;
 
 import com.godmonth.status2.executor.intf.OrderExecutor;
 import com.godmonth.status2.test.sample.db2.RepoConfig2;
@@ -28,10 +28,9 @@ import java.util.Optional;
  * @author shenyue
  */
 @ComponentScan
-@SpringBootTest(classes = {RepoConfig2.class, RepoConfig3.class, SampleOrderExecutorConfig3.class})
+@SpringBootTest(classes = {RepoConfig2.class, RepoConfig3.class, OEConfig2.class})
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class})
-public class Sample3Test {
-
+public class Sample3Up1Test {
     @Autowired
     private OrderExecutor<SampleModel, Object> sampleModelOrderExecutor;
 
@@ -40,10 +39,6 @@ public class Sample3Test {
 
     @Autowired
     private SampleModelReadOnlyRepository sampleModelReadOnlyRepository;
-
-    @Qualifier("d2")
-    @Autowired
-    private DataSource dataSource2;
 
     @Qualifier("d3")
     @Autowired
@@ -65,6 +60,4 @@ public class Sample3Test {
         Optional<SampleModel> byId2 = sampleModelReadOnlyRepository.findById(1L);
         Assertions.assertFalse(byId2.isPresent());
     }
-
-
 }
