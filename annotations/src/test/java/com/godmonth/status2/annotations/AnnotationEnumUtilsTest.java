@@ -15,15 +15,15 @@ class AnnotationEnumUtilsTest {
     @Test
     void t1() {
         StatusBinding annotation = T1.class.getAnnotation(StatusBinding.class);
-        Object o = AnnotationValueUtils.parseEnumValue(annotation, "statusClass", "statusValue");
-        Assertions.assertEquals("VV", o);
+        Object o = AnnotationValueUtils.parseArrayEnumValue(annotation, "statusClass", "statusValue");
+        Assertions.assertArrayEquals(new String[]{"VV"}, (Object[]) o);
     }
 
     @Test
     void t2() {
         StatusBinding annotation = T2.class.getAnnotation(StatusBinding.class);
-        Object o = AnnotationValueUtils.parseEnumValue(annotation, "statusClass", "statusValue");
-        Assertions.assertEquals(SampleStatus.S1, o);
+        Object o = AnnotationValueUtils.parseArrayEnumValue(annotation, "statusClass", "statusValue");
+        Assertions.assertArrayEquals(new SampleStatus[]{SampleStatus.S1}, (Object[]) o);
     }
 
     public static enum SampleStatus {

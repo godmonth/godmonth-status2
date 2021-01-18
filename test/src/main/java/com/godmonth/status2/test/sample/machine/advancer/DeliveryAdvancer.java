@@ -11,6 +11,7 @@ import com.godmonth.status2.annotations.Advancer;
 import com.godmonth.status2.annotations.binding.ModelBinding;
 import com.godmonth.status2.test.sample.domain.SampleStatus;
 import com.godmonth.status2.transitor.tx.intf.TriggerBehavior;
+
 @Advancer
 @ModelBinding(SampleModel.class)
 @SampleStatusBinding(SampleStatus.PAID)

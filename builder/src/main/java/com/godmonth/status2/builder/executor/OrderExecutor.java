@@ -35,7 +35,7 @@ public @interface OrderExecutor {
      *
      * @return
      */
-    String advancerBasePackages() default "";
+    String[] advancerBasePackages() default {};
 
     /**
      * 默认同级package下
@@ -67,6 +67,7 @@ public @interface OrderExecutor {
 
     /**
      * 线程池beanName
+     *
      * @return
      */
     String threadPoolRef() default "";

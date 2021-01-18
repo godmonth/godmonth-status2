@@ -14,7 +14,7 @@ import java.util.function.Function;
 @ToString
 @Getter
 public class StateMachineAnalysis<MODEL> {
-    protected Function<Class, Object> bindingKeyFunction;
+    protected Function<Class, Object[]> bindingKeyFunction;
 
     private ModelAnalysis<MODEL> modelAnalysis;
 
