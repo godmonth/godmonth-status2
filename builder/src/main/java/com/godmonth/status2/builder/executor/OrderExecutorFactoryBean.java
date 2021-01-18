@@ -88,7 +88,7 @@ public class OrderExecutorFactoryBean implements FactoryBean<OrderExecutor>, App
 
         final String threadPoolRef = (String) annotationAttributes.get("threadPoolRef");
         ExecutorService executorService = null;
-        if (StringUtils.isNotBlank(entityManagerRef)) {
+        if (StringUtils.isNotBlank(threadPoolRef)) {
             executorService = (ExecutorService) applicationContext.getBean(threadPoolRef);
         }
 
