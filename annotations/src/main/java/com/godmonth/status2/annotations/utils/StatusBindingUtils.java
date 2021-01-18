@@ -12,7 +12,8 @@ public class StatusBindingUtils {
     private StatusBindingUtils() {
     }
 
-    public static Object parseStatusValue(StatusBinding statusBinding) {
-        return AnnotationValueUtils.parseEnumValue(statusBinding, "statusClass", "statusValue");
+    public static Object[] parseStatusValues(StatusBinding statusBinding) {
+        return AnnotationValueUtils.parseArrayEnumValue(statusBinding, "statusClass", "statusValue");
     }
+
 }

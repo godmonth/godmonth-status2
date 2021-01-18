@@ -24,7 +24,7 @@ import java.util.function.Predicate;
 public class AdvancerBindingListBuilder {
 
     @Builder
-    private static List<Pair<Object, StatusAdvancer>> build(@Singular Set<String> packageNames, Class modelClass, Predicate<Class> predicate, AutowireCapableBeanFactory autowireCapableBeanFactory, Function<Class, Object> bindingKeyFunction) throws IOException, ClassNotFoundException {
+    private static List<Pair<Object, StatusAdvancer>> build(@Singular Set<String> packageNames, Class modelClass, Predicate<Class> predicate, AutowireCapableBeanFactory autowireCapableBeanFactory, Function<Class, Object[]> bindingKeyFunction) throws IOException, ClassNotFoundException {
         return BindingListBuilder.<StatusAdvancer>builder().enableAnnotationClass(Advancer.class).packageNames(packageNames).ancestorClass(StatusAdvancer.class).modelClass(modelClass).predicate(predicate).autowireCapableBeanFactory(autowireCapableBeanFactory).bindingKeyFunction(bindingKeyFunction).build();
     }
 

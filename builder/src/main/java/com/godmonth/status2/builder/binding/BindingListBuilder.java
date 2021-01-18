@@ -28,7 +28,7 @@ import java.util.function.Predicate;
 @Slf4j
 public class BindingListBuilder {
     @Builder
-    private static <T> List<Pair<Object, T>> build(ClassLoader classLoader, @NonNull @Singular Set<String> packageNames, Class enableAnnotationClass, Class ancestorClass, Class modelClass, Predicate<Class> predicate, Function<Class, Object> bindingKeyFunction, @NonNull AutowireCapableBeanFactory autowireCapableBeanFactory) throws IOException, ClassNotFoundException {
+    private static <T> List<Pair<Object, T>> build(ClassLoader classLoader, @NonNull @Singular Set<String> packageNames, Class enableAnnotationClass, Class ancestorClass, Class modelClass, Predicate<Class> predicate, Function<Class, Object[]> bindingKeyFunction, @NonNull AutowireCapableBeanFactory autowireCapableBeanFactory) throws IOException, ClassNotFoundException {
         Validate.notEmpty(packageNames, "packageNames is empty");
         bindingKeyFunction = bindingKeyFunction != null ? bindingKeyFunction : BindingKeyUtils::getBindingKey;
         List<Pair<Object, T>> list = new ArrayList<>();
@@ -60,10 +60,9 @@ public class BindingListBuilder {
                 if (predicate != null && !predicate.test(aClass)) {
                     continue;
                 }
-
-                Pair<Object, T> pair = createByAnnotation(aClass, autowireCapableBeanFactory, bindingKeyFunction);
-                if (pair != null) {
-                    list.add(pair);
+                final List<Pair<Object, T>> byAnnotation = createByAnnotation(aClass, autowireCapableBeanFactory, bindingKeyFunction);
+                if (byAnnotation != null) {
+                    list.addAll(byAnnotation);
                 }
             }
         }
@@ -71,14 +70,19 @@ public class BindingListBuilder {
         return list;
     }
 
-    public static <T> Pair<Object, T> createByAnnotation(Class aClass, AutowireCapableBeanFactory autowireCapableBeanFactory, Function<Class, Object> bindingKeyFunction) {
-        Object key = bindingKeyFunction.apply(aClass);
-        if (key != null) {
+    public static <T> List<Pair<Object, T>> createByAnnotation(Class aClass, AutowireCapableBeanFactory autowireCapableBeanFactory, Function<Class, Object[]> bindingKeyFunction) {
+        Object[] keys = bindingKeyFunction.apply(aClass);
+        List<Pair<Object, T>> pairs = new ArrayList<>();
+        if (keys != null) {
             T component = (T) autowireCapableBeanFactory.autowire(aClass, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
-            if (component != null) {
-                return Pair.of(key, component);
+            for (int i = 0; i < keys.length; i++) {
+                Object key = keys[i];
+                if (component != null) {
+                    final Pair<Object, T> of = Pair.of(key, component);
+                    pairs.add(of);
+                }
             }
         }
-        return null;
+        return pairs;
     }
 }

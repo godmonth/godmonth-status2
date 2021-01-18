@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 @ModelBinding(SampleModel.class)
 @StatusBinding(statusClass = SampleStatus.class, statusValue = "CREATED")
 public class PayAdvancer implements StatusAdvancer<SampleModel, String, SampleTrigger> {
+
     @Autowired
     private SampleModelRepository sampleModelRepository;
 

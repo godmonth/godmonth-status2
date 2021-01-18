@@ -17,7 +17,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Import({ OrderExecutorBeanDefinitionRegistrar.class})
+@Import({OrderExecutorBeanDefinitionRegistrar.class})
 @Order
 public @interface OrderExecutor {
 
@@ -35,7 +35,7 @@ public @interface OrderExecutor {
      *
      * @return
      */
-    String[] advancerBasePackages() default {};
+    String advancerBasePackages() default "";
 
     /**
      * 默认同级package下
@@ -64,4 +64,10 @@ public @interface OrderExecutor {
      * @return
      */
     String stateMachineDefinitionResource();
+
+    /**
+     * 线程池beanName
+     * @return
+     */
+    String threadPoolRef() default "";
 }

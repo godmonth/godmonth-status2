@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Entry
-@SampleStatusBinding(SampleStatus.PAID)
+@SampleStatusBinding({SampleStatus.PAID, SampleStatus.CREATED, SampleStatus.DELIVERED, SampleStatus.EVALUATED})
 public class EchoStatusEntry implements StatusEntry<SampleModel, Void> {
     @Override
     public void nextStatusEntry(TransitedResult<SampleModel, Void> transitedResult) {

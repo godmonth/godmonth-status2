@@ -34,6 +34,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 
 /**
@@ -85,6 +86,11 @@ public class OrderExecutorFactoryBean implements FactoryBean<OrderExecutor>, App
             transactionOperations = applicationContext.getBean(TransactionOperations.class);
         }
 
+        final String threadPoolRef = (String) annotationAttributes.get("threadPoolRef");
+        ExecutorService executorService = null;
+        if (StringUtils.isNotBlank(entityManagerRef)) {
+            executorService = (ExecutorService) applicationContext.getBean(threadPoolRef);
+        }
 
         final String stateMachineDefinitionResourceStr = (String) annotationAttributes.get("stateMachineDefinitionResource");
         ResourceLoader resourceLoader = new DefaultResourceLoader();
@@ -115,7 +121,13 @@ public class OrderExecutorFactoryBean implements FactoryBean<OrderExecutor>, App
         }
         com.godmonth.status2.executor.intf.OrderExecutor orderExecutor = null;
         try {
-            orderExecutor = orderExecutor(applicationContext.getAutowireCapableBeanFactory(), stateMachineAnalysis, txStatusTransitor, advancerPackages);
+            List<Pair<Object, StatusAdvancer>> advancerBindingList = AdvancerBindingListBuilder.builder().autowireCapableBeanFactory(applicationContext.getAutowireCapableBeanFactory()).modelClass(stateMachineAnalysis.getModelAnalysis().getModelClass()).packageNames(advancerPackages).bindingKeyFunction(stateMachineAnalysis.getBindingKeyFunction()).build();
+            //advancerBindingList.add(xxx);增加你需要定制的推进器
+            final DefaultOrderExecutor.DefaultOrderExecutorBuilder builder = DefaultOrderExecutor.builder().modelAnalysis(stateMachineAnalysis.getModelAnalysis()).advancerBindingList(advancerBindingList).txStatusTransitor(txStatusTransitor);
+            if (executorService != null) {
+                builder.executorService(executorService);
+            }
+            orderExecutor = builder.build();
         } catch (IOException | ClassNotFoundException e) {
             throw new ContextedRuntimeException(e);
         }
@@ -132,20 +144,6 @@ public class OrderExecutorFactoryBean implements FactoryBean<OrderExecutor>, App
         this.applicationContext = applicationContext;
     }
 
-    /**
-     * advancer package 可以定义在参数
-     *
-     * @param beanFactory
-     * @param txStatusTransitor
-     * @return
-     * @throws IOException
-     * @throws ClassNotFoundException
-     */
-    private com.godmonth.status2.executor.intf.OrderExecutor orderExecutor(AutowireCapableBeanFactory beanFactory, StateMachineAnalysis machineAnalysis, TxStatusTransitor txStatusTransitor, Set<String> advancerPacakgeNames) throws IOException, ClassNotFoundException {
-        List<Pair<Object, StatusAdvancer>> advancerBindingList = AdvancerBindingListBuilder.builder().autowireCapableBeanFactory(beanFactory).modelClass(machineAnalysis.getModelAnalysis().getModelClass()).packageNames(advancerPacakgeNames).bindingKeyFunction(machineAnalysis.getBindingKeyFunction()).build();
-        //advancerBindingList.add(xxx);增加你需要定制的推进器
-        return DefaultOrderExecutor.builder().modelAnalysis(machineAnalysis.getModelAnalysis()).advancerBindingList(advancerBindingList).txStatusTransitor(txStatusTransitor).build();
-    }
 
     /**
      * entry package 可以定义在参数

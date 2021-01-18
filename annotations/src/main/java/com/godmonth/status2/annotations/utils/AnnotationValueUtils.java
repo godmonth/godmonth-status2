@@ -25,6 +25,14 @@ public class AnnotationValueUtils {
         }
     }
 
+    public static Object[] getArrayValue(Annotation annotation, String valueParam) {
+        try {
+            Method valueMethod = annotation.getClass().getMethod(valueParam);
+            return (Object[]) valueMethod.invoke(annotation);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            throw new ContextedRuntimeException(e);
+        }
+    }
     public static Object parseEnumValue(Annotation annotation, String valueClassParam, String valueParam) {
         try {
             Method valueClassMethod = annotation.getClass().getMethod(valueClassParam);
@@ -35,6 +43,29 @@ public class AnnotationValueUtils {
                 return value;
             } else if (valueClass.isEnum()) {
                 return Enum.valueOf(valueClass, value);
+            } else {
+                throw new IllegalArgumentException("status type only supports string or enum:" + valueClass);
+            }
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            throw new ContextedRuntimeException(e);
+        }
+    }
+
+
+    public static Object[] parseArrayEnumValue(Annotation annotation, String valueClassParam, String valueParam) {
+        try {
+            Method valueClassMethod = annotation.getClass().getMethod(valueClassParam);
+            Class valueClass = (Class) valueClassMethod.invoke(annotation);
+            Method valueMethod = annotation.getClass().getMethod(valueParam);
+            String[] value = (String[]) valueMethod.invoke(annotation);
+            if (String.class.equals(valueClass)) {
+                return value;
+            } else if (valueClass.isEnum()) {
+                Object[] enums = new Object[value.length];
+                for (int i = 0; i < value.length; i++) {
+                    enums[i] = Enum.valueOf(valueClass, value[i]);
+                }
+                return enums;
             } else {
                 throw new IllegalArgumentException("status type only supports string or enum:" + valueClass);
             }

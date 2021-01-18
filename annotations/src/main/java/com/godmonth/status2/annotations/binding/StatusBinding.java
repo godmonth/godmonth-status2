@@ -23,7 +23,7 @@ public @interface StatusBinding {
      */
     Class statusClass() default String.class;
 
-    String statusValue();
+    String[] statusValue();
 
 
 }

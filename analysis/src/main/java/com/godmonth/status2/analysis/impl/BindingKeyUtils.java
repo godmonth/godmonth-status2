@@ -20,34 +20,38 @@ public class BindingKeyUtils {
     private BindingKeyUtils() {
     }
 
-    public static Object getBindingKey(Class componentClass) {
+    public static Object[] getBindingKey(Class componentClass) {
         return getBindingKey(componentClass, null, null);
     }
 
-    public static Object getBindingKey(Class componentClass, AnnotationField statusField, AnnotationField instField) {
-        Object statusKeyPart = getStatusBindingKeyPart(componentClass, statusField);
+    public static Object[] getBindingKey(Class componentClass, AnnotationField statusField, AnnotationField instField) {
+        final Object[] statusKeyPart = getStatusPart(componentClass, statusField);
         Validate.notNull(statusKeyPart, "statusBindingKeyPart is null");
         Object instKeyPart = getInstructionBindingKeyPart(componentClass, instField);
+        Object[] bindKeyArray = new Object[statusKeyPart.length];
         if (instKeyPart != null) {
-            return Pair.of(statusKeyPart, instKeyPart);
+            for (int i = 0; i < statusKeyPart.length; i++) {
+                bindKeyArray[i] = Pair.of(statusKeyPart[i], instKeyPart);
+            }
+            return bindKeyArray;
         }
         return statusKeyPart;
     }
 
-    public static Object getStatusBindingKeyPart(Class componentClass, AnnotationField statusField) {
-        Object keyPart = getBindingKeyPart(componentClass, statusField);
+    private static Object[] getStatusPart(Class componentClass, AnnotationField statusField) {
+        Object[] keyPart = getBindingKeyArrayPart(componentClass, statusField);
         if (keyPart != null) {
             return keyPart;
         }
         StatusBinding statusBinding = AnnotationUtils.findAnnotation(componentClass, StatusBinding.class);
         if (statusBinding != null) {
-            keyPart = StatusBindingUtils.parseStatusValue(statusBinding);
+            return StatusBindingUtils.parseStatusValues(statusBinding);
         }
-        return keyPart;
+        throw new IllegalArgumentException("binding key status part is null");
     }
 
 
-    public static Object getInstructionBindingKeyPart(Class componentClass, AnnotationField statusField) {
+    private static Object getInstructionBindingKeyPart(Class componentClass, AnnotationField statusField) {
         Object keyPart = getBindingKeyPart(componentClass, statusField);
         if (keyPart != null) {
             return keyPart;
@@ -59,7 +63,7 @@ public class BindingKeyUtils {
         return keyPart;
     }
 
-    public static Object getBindingKeyPart(Class componentClass, AnnotationField statusField) {
+    private static Object getBindingKeyPart(Class componentClass, AnnotationField statusField) {
         if (statusField != null) {
             Annotation annotation = AnnotationUtils.findAnnotation(componentClass, statusField.getAnnoClass());
             if (annotation != null) {
@@ -69,5 +73,14 @@ public class BindingKeyUtils {
         return null;
     }
 
+    private static Object[] getBindingKeyArrayPart(Class componentClass, AnnotationField statusField) {
+        if (statusField != null) {
+            Annotation annotation = AnnotationUtils.findAnnotation(componentClass, statusField.getAnnoClass());
+            if (annotation != null) {
+                return AnnotationValueUtils.getArrayValue(annotation, statusField.getPropertyName());
+            }
+        }
+        return null;
+    }
 
 }
