@@ -31,10 +31,11 @@ public class AdvancedResult<MODEL, TRIGGER> {
      */
     @Builder.Default
     private NextOperation nextOperation = NextOperation.ADVANCE;
+    
     /**
      * 丢弃指令
      */
-    private boolean dropInstruction;
+    private NextInstruction nextInstruction;
 
     /**
      * @param triggerBehavior

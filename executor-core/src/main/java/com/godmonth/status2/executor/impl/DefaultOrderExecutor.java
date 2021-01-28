@@ -89,21 +89,30 @@ public class DefaultOrderExecutor<MODEL, INST, TRIGGER> implements OrderExecutor
             if (advancedResult.getTriggerBehavior() != null) {
                 model = txStatusTransitor.transit(model, advancedResult.getTriggerBehavior());
                 Validate.notNull(model, "transited model is null.");
-                if (advancedResult.isDropInstruction()) {
-                    instruction = null;
-                    message = null;
-                }
-                switch (advancedResult.getNextOperation()) {
-                    case ADVANCE:
-                        advancedResult = null;
-                        continue;
-                    case ASYNC_ADVANCE:
-                        logger.trace("executeAsync");
-                        executeAsync1(model, instruction, message);
-                        break;
-                    case PAUSE:
-                        logger.trace("pause");
-                        break;
+                if (advancedResult.getNextInstruction() != null) {
+
+                    if (advancedResult.getNextInstruction().isDrop()) {
+                        instruction = null;
+                        message = null;
+                    }
+
+                    if (advancedResult.getNextInstruction().getInstruction() != null) {
+                        instruction = (INST) advancedResult.getNextInstruction().getInstruction();
+                        message = advancedResult.getNextInstruction().getMessage();
+                    }
+
+                    switch (advancedResult.getNextOperation()) {
+                        case ADVANCE:
+                            advancedResult = null;
+                            continue;
+                        case ASYNC_ADVANCE:
+                            logger.trace("executeAsync");
+                            executeAsync1(model, instruction, message);
+                            break;
+                        case PAUSE:
+                            logger.trace("pause");
+                            break;
+                    }
                 }
             }
             break;
