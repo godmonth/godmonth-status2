@@ -90,7 +90,6 @@ public class DefaultOrderExecutor<MODEL, INST, TRIGGER> implements OrderExecutor
                 model = txStatusTransitor.transit(model, advancedResult.getTriggerBehavior());
                 Validate.notNull(model, "transited model is null.");
                 if (advancedResult.getNextInstruction() != null) {
-
                     if (advancedResult.getNextInstruction().isDrop()) {
                         instruction = null;
                         message = null;
@@ -100,19 +99,18 @@ public class DefaultOrderExecutor<MODEL, INST, TRIGGER> implements OrderExecutor
                         instruction = (INST) advancedResult.getNextInstruction().getInstruction();
                         message = advancedResult.getNextInstruction().getMessage();
                     }
-
-                    switch (advancedResult.getNextOperation()) {
-                        case ADVANCE:
-                            advancedResult = null;
-                            continue;
-                        case ASYNC_ADVANCE:
-                            logger.trace("executeAsync");
-                            executeAsync1(model, instruction, message);
-                            break;
-                        case PAUSE:
-                            logger.trace("pause");
-                            break;
-                    }
+                }
+                switch (advancedResult.getNextOperation()) {
+                    case ADVANCE:
+                        advancedResult = null;
+                        continue;
+                    case ASYNC_ADVANCE:
+                        logger.trace("executeAsync");
+                        executeAsync1(model, instruction, message);
+                        break;
+                    case PAUSE:
+                        logger.trace("pause");
+                        break;
                 }
             }
             break;

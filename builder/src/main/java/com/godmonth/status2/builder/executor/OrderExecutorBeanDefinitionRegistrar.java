@@ -15,7 +15,6 @@ import java.util.Map;
  *
  * @author shenyue
  */
-@DependsOn("entityManager")
 public class OrderExecutorBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar {
 
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
