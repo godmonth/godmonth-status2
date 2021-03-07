@@ -23,4 +23,10 @@ public class AnnotationBeanModelAnalysisTest {
         Field abc = FieldUtils.getField(Abc.class, "abc", true);
         System.out.println(abc);
     }
+
+    @Test
+    void defChild() {
+        AnnotationBeanModelAnalysis<DefChild> objectAnnotationBeanModelAnalysis = new AnnotationBeanModelAnalysis<>(DefChild.class);
+        System.out.println(objectAnnotationBeanModelAnalysis);
+    }
 }
