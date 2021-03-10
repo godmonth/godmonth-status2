@@ -2,9 +2,9 @@ package com.godmonth.status2.builder.executor;
 
 import org.apache.commons.lang3.exception.ContextedRuntimeException;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.type.AnnotationMetadata;
 
@@ -15,7 +15,8 @@ import java.util.Map;
  *
  * @author shenyue
  */
-public class OrderExecutorBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar {
+public class OrderExecutorBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar, BeanClassLoaderAware {
+    private ClassLoader classLoader;
 
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
         Class underlyClass = null;
@@ -27,14 +28,20 @@ public class OrderExecutorBeanDefinitionRegistrar implements ImportBeanDefinitio
 
         final Map<String, Object> annotationAttributes = importingClassMetadata.getAnnotationAttributes(OrderExecutor.class.getName());
 
+
         GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
         beanDefinition.setBeanClassName(OrderExecutorFactoryBean.class.getName());
         MutablePropertyValues values = new MutablePropertyValues();
         values.addPropertyValue("annotationAttributes", annotationAttributes);
         values.addPropertyValue("underlyClass", underlyClass);
+        values.addPropertyValue("classLoader", classLoader);
         beanDefinition.setPropertyValues(values);
         final String beanName = (String) annotationAttributes.get("beanName");
         registry.registerBeanDefinition(beanName, beanDefinition);
     }
 
+    @Override
+    public void setBeanClassLoader(ClassLoader classLoader) {
+        this.classLoader = classLoader;
+    }
 }

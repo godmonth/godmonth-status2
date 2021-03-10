@@ -57,7 +57,7 @@ public class OrderExecutorFactoryBean implements FactoryBean<OrderExecutor>, App
     private ApplicationContext applicationContext;
 
     @Setter
-    private ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+    private ClassLoader classLoader;
 
     @Override
     public com.godmonth.status2.executor.intf.OrderExecutor getObject() throws Exception {
