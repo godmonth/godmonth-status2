@@ -55,10 +55,12 @@ public class DefaultOrderExecutor<MODEL, INST, TRIGGER> implements OrderExecutor
     }
 
     public void setAdvancerBindingMap(Map<Object, StatusAdvancer> advancerMap) {
+        logger.trace("advancerBindingMap:{}", advancerMap);
         this.advancerFunctions = advancerMap::get;
     }
 
     public void setAdvancerBindingList(List<Pair<Object, StatusAdvancer>> advancerBindingList) {
+        logger.trace("advancerBindingList:{}", advancerBindingList);
         this.advancerFunctions = convert(advancerBindingList);
     }
 
