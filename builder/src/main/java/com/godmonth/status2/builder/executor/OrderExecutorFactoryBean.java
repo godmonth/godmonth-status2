@@ -16,6 +16,8 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ContextedRuntimeException;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -42,7 +44,10 @@ import java.util.function.Function;
  *
  * @author shenyue
  */
+
 public class OrderExecutorFactoryBean implements FactoryBean<OrderExecutor>, ApplicationContextAware {
+    private static final Logger logger = LoggerFactory.getLogger(OrderExecutorFactoryBean.class);
+
     @Setter
     private Map<String, Object> annotationAttributes;
 
@@ -122,6 +127,7 @@ public class OrderExecutorFactoryBean implements FactoryBean<OrderExecutor>, App
         com.godmonth.status2.executor.intf.OrderExecutor orderExecutor = null;
         try {
             List<Pair<Object, StatusAdvancer>> advancerBindingList = AdvancerBindingListBuilder.builder().autowireCapableBeanFactory(applicationContext.getAutowireCapableBeanFactory()).modelClass(stateMachineAnalysis.getModelAnalysis().getModelClass()).packageNames(advancerPackages).bindingKeyFunction(stateMachineAnalysis.getBindingKeyFunction()).build();
+            logger.trace("advancerBindingList:{}", advancerBindingList);
             //advancerBindingList.add(xxx);增加你需要定制的推进器
             final DefaultOrderExecutor.DefaultOrderExecutorBuilder builder = DefaultOrderExecutor.builder().modelAnalysis(stateMachineAnalysis.getModelAnalysis()).advancerBindingList(advancerBindingList).txStatusTransitor(txStatusTransitor);
             if (executorService != null) {

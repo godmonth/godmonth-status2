@@ -9,7 +9,6 @@ import com.godmonth.status2.executor.intf.ExecutionRequest;
 import com.godmonth.status2.executor.intf.OrderExecutor;
 import com.godmonth.status2.executor.intf.SyncResult;
 import com.godmonth.status2.transitor.tx.intf.TxStatusTransitor;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -27,7 +26,6 @@ import java.util.concurrent.Future;
 import java.util.function.Function;
 
 @NoArgsConstructor
-@AllArgsConstructor
 @Builder
 public class DefaultOrderExecutor<MODEL, INST, TRIGGER> implements OrderExecutor<MODEL, INST> {
 
@@ -45,6 +43,14 @@ public class DefaultOrderExecutor<MODEL, INST, TRIGGER> implements OrderExecutor
 
     @Setter
     protected ModelAnalysis<MODEL> modelAnalysis;
+
+    public DefaultOrderExecutor(Function<Object, StatusAdvancer> advancerFunctions, TxStatusTransitor<MODEL, TRIGGER> txStatusTransitor, ExecutorService executorService, ModelAnalysis<MODEL> modelAnalysis) {
+        this.advancerFunctions = advancerFunctions;
+        this.txStatusTransitor = txStatusTransitor;
+        this.executorService = executorService;
+        this.modelAnalysis = modelAnalysis;
+        logger.trace("advancerFunctions:{}", advancerFunctions);
+    }
 
     public static Function<Object, StatusAdvancer> convert(List<Pair<Object, StatusAdvancer>> advancerBindings) {
         Map<Object, StatusAdvancer> advancerMap = new HashMap<>();
