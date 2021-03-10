@@ -56,6 +56,8 @@ public class OrderExecutorFactoryBean implements FactoryBean<OrderExecutor>, App
 
     private ApplicationContext applicationContext;
 
+    @Setter
+    private ClassLoader classLoader = ClassLoader.getSystemClassLoader();
 
     @Override
     public com.godmonth.status2.executor.intf.OrderExecutor getObject() throws Exception {
@@ -126,7 +128,7 @@ public class OrderExecutorFactoryBean implements FactoryBean<OrderExecutor>, App
         }
         com.godmonth.status2.executor.intf.OrderExecutor orderExecutor = null;
         try {
-            List<Pair<Object, StatusAdvancer>> advancerBindingList = AdvancerBindingListBuilder.builder().autowireCapableBeanFactory(applicationContext.getAutowireCapableBeanFactory()).modelClass(stateMachineAnalysis.getModelAnalysis().getModelClass()).packageNames(advancerPackages).bindingKeyFunction(stateMachineAnalysis.getBindingKeyFunction()).build();
+            List<Pair<Object, StatusAdvancer>> advancerBindingList = AdvancerBindingListBuilder.builder().classLoader(classLoader).autowireCapableBeanFactory(applicationContext.getAutowireCapableBeanFactory()).modelClass(stateMachineAnalysis.getModelAnalysis().getModelClass()).packageNames(advancerPackages).bindingKeyFunction(stateMachineAnalysis.getBindingKeyFunction()).build();
             logger.trace("advancerBindingList:{}", advancerBindingList);
             //advancerBindingList.add(xxx);增加你需要定制的推进器
             final DefaultOrderExecutor.DefaultOrderExecutorBuilder builder = DefaultOrderExecutor.builder().modelAnalysis(stateMachineAnalysis.getModelAnalysis()).advancerBindingList(advancerBindingList).txStatusTransitor(txStatusTransitor);
