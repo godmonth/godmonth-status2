@@ -24,7 +24,7 @@ import java.util.function.Predicate;
 public class StatusEntryBindingListBuilder {
 
     @Builder
-    private static List<Pair<Object, StatusEntry>> build(@Singular Set<String> packageNames, Class modelClass, Predicate<Class> predicate, AutowireCapableBeanFactory autowireCapableBeanFactory, Function<Class, Object[]> bindingKeyFunction) throws IOException, ClassNotFoundException {
-        return BindingListBuilder.<StatusEntry>builder().enableAnnotationClass(Entry.class).packageNames(packageNames).ancestorClass(StatusEntry.class).modelClass(modelClass).predicate(predicate).autowireCapableBeanFactory(autowireCapableBeanFactory).bindingKeyFunction(bindingKeyFunction).build();
+    private static List<Pair<Object, StatusEntry>> build(ClassLoader classLoader, @Singular Set<String> packageNames, Class modelClass, Predicate<Class> predicate, AutowireCapableBeanFactory autowireCapableBeanFactory, Function<Class, Object[]> bindingKeyFunction) throws IOException, ClassNotFoundException {
+        return BindingListBuilder.<StatusEntry>builder().classLoader(classLoader).enableAnnotationClass(Entry.class).packageNames(packageNames).ancestorClass(StatusEntry.class).modelClass(modelClass).predicate(predicate).autowireCapableBeanFactory(autowireCapableBeanFactory).bindingKeyFunction(bindingKeyFunction).build();
     }
 }
