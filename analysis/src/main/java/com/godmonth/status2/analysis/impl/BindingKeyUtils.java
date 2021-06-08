@@ -73,11 +73,11 @@ public class BindingKeyUtils {
         return null;
     }
 
-    private static Object[] getBindingKeyArrayPart(Class componentClass, AnnotationField statusField) {
-        if (statusField != null) {
-            Annotation annotation = AnnotationUtils.findAnnotation(componentClass, statusField.getAnnoClass());
+    private static Object[] getBindingKeyArrayPart(Class componentClass, AnnotationField annotationField) {
+        if (annotationField != null) {
+            Annotation annotation = AnnotationUtils.findAnnotation(componentClass, annotationField.getAnnoClass());
             if (annotation != null) {
-                return AnnotationValueUtils.getArrayValue(annotation, statusField.getPropertyName());
+                return AnnotationValueUtils.getArrayValue(annotation, annotationField.getPropertyName());
             }
         }
         return null;

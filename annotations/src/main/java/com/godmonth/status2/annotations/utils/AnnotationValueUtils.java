@@ -28,11 +28,17 @@ public class AnnotationValueUtils {
     public static Object[] getArrayValue(Annotation annotation, String valueParam) {
         try {
             Method valueMethod = annotation.getClass().getMethod(valueParam);
-            return (Object[]) valueMethod.invoke(annotation);
+            final Object invoke = valueMethod.invoke(annotation);
+            if (invoke.getClass().isArray()) {
+                return (Object[]) invoke;
+            } else {
+                return new Object[]{invoke};
+            }
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             throw new ContextedRuntimeException(e);
         }
     }
+
     public static Object parseEnumValue(Annotation annotation, String valueClassParam, String valueParam) {
         try {
             Method valueClassMethod = annotation.getClass().getMethod(valueClassParam);
