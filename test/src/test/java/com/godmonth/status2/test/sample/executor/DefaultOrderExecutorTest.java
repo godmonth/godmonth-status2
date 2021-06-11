@@ -43,7 +43,7 @@ public class DefaultOrderExecutorTest {
         defaultOrderExecutor.setModelAnalysis(modelAnalysis);
         Map<Object, StatusAdvancer> advancerMap = new HashMap<>();
         advancerMap.put(SampleStatus.CREATED, advanceRequest -> new AdvancedResult<>(new TriggerBehavior<>(SampleTrigger.PAY)));
-        defaultOrderExecutor.setAdvancerBindingMap(advancerMap);
+        defaultOrderExecutor.setAdvancerRouterMap(advancerMap);
 
         TxStatusTransitorImpl<SampleModel, SampleStatus, SampleTrigger> txStatusTransitor = new TxStatusTransitorImpl<>();
         SimpleStatusTransitor<SampleStatus, SampleTrigger> statusTransitor = new SimpleStatusTransitor<>(

@@ -131,7 +131,7 @@ public class OrderExecutorFactoryBean implements FactoryBean<OrderExecutor>, App
             List<Pair<Object, StatusAdvancer>> advancerBindingList = AdvancerBindingListBuilder.builder().classLoader(classLoader).autowireCapableBeanFactory(applicationContext.getAutowireCapableBeanFactory()).modelClass(stateMachineAnalysis.getModelAnalysis().getModelClass()).packageNames(advancerPackages).bindingKeyFunction(stateMachineAnalysis.getBindingKeyFunction()).build();
             logger.trace("advancerBindingList:{}", advancerBindingList);
             //advancerBindingList.add(xxx);增加你需要定制的推进器
-            final DefaultOrderExecutor.DefaultOrderExecutorBuilder builder = DefaultOrderExecutor.builder().modelAnalysis(stateMachineAnalysis.getModelAnalysis()).advancerBindingList(advancerBindingList).txStatusTransitor(txStatusTransitor);
+            final DefaultOrderExecutor.DefaultOrderExecutorBuilder builder = DefaultOrderExecutor.builder().modelAnalysis(stateMachineAnalysis.getModelAnalysis()).advancerRouterList(advancerBindingList).txStatusTransitor(txStatusTransitor);
             if (executorService != null) {
                 builder.executorService(executorService);
             }

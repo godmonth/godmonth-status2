@@ -64,7 +64,7 @@ public class SampleOrderExecutorConfig2 {
     public OrderExecutor<SampleModel, Object> sampleModelOrderExecutor(AutowireCapableBeanFactory beanFactory, @Qualifier("sampleStateMachineAnalysis") StateMachineAnalysis sampleStateMachineAnalysis, @Qualifier("sampleStatusTxStatusTransitor") TxStatusTransitor txStatusTransitor) throws IOException, ClassNotFoundException {
         List<Pair<Object, StatusAdvancer>> advancerBindingList = AdvancerBindingListBuilder.builder().autowireCapableBeanFactory(beanFactory).modelClass(SampleModel.class).packageName("com.godmonth.status2.test.sample.machine.advancer").bindingKeyFunction(sampleStateMachineAnalysis.getBindingKeyFunction()).build();
         //advancerBindingList.add(xxx);增加你需要定制的推进器
-        return DefaultOrderExecutor.builder().modelAnalysis(sampleStateMachineAnalysis.getModelAnalysis()).advancerBindingList(advancerBindingList).txStatusTransitor(txStatusTransitor).build();
+        return DefaultOrderExecutor.builder().modelAnalysis(sampleStateMachineAnalysis.getModelAnalysis()).advancerRouterList(advancerBindingList).txStatusTransitor(txStatusTransitor).build();
     }
 
     /**

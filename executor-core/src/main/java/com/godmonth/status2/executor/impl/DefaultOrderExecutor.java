@@ -60,14 +60,14 @@ public class DefaultOrderExecutor<MODEL, INST, TRIGGER> implements OrderExecutor
         return advancerMap::get;
     }
 
-    public void setAdvancerBindingMap(Map<Object, StatusAdvancer> advancerMap) {
-        logger.trace("advancerBindingMap:{}", advancerMap);
-        this.advancerRouter = advancerMap::get;
+    public void setAdvancerRouterMap(Map<Object, StatusAdvancer> advancerRouterMap) {
+        logger.trace("advancerRouterMap:{}", advancerRouterMap);
+        this.advancerRouter = advancerRouterMap::get;
     }
 
-    public void setAdvancerBindingList(List<Pair<Object, StatusAdvancer>> advancerBindingList) {
-        logger.trace("advancerBindingList:{}", advancerBindingList);
-        this.advancerRouter = convert(advancerBindingList);
+    public void setAdvancerRouterList(List<Pair<Object, StatusAdvancer>> advancerRouterList) {
+        logger.trace("advancerBindingList:{}", advancerRouterList);
+        this.advancerRouter = convert(advancerRouterList);
     }
 
     protected SyncResult<MODEL, ?> execute1(MODEL model, INST instruction, Object message) {
@@ -147,10 +147,10 @@ public class DefaultOrderExecutor<MODEL, INST, TRIGGER> implements OrderExecutor
     }
 
     public static class DefaultOrderExecutorBuilder<MODEL, INST, TRIGGER> {
-        private Function<Object, StatusAdvancer> advancerFunctions;
+        private Function<Object, StatusAdvancer> advancerRouter;
 
-        public DefaultOrderExecutorBuilder advancerBindingList(List<Pair<Object, StatusAdvancer>> advancerBindingList) {
-            this.advancerFunctions = convert(advancerBindingList);
+        public DefaultOrderExecutorBuilder advancerRouterList(List<Pair<Object, StatusAdvancer>> advancerRouterList) {
+            this.advancerRouter = convert(advancerRouterList);
             return this;
         }
 
