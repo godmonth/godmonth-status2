@@ -14,6 +14,9 @@ import java.util.function.Function;
 @ToString
 @Getter
 public class StateMachineAnalysis<MODEL> {
+    /**
+     * 这class是推进器
+     */
     protected Function<Class, Object[]> bindingKeyFunction;
 
     private ModelAnalysis<MODEL> modelAnalysis;

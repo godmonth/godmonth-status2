@@ -27,6 +27,20 @@ import java.util.function.Predicate;
  */
 @Slf4j
 public class BindingListBuilder {
+    /**
+     * @param classLoader
+     * @param packageNames
+     * @param enableAnnotationClass
+     * @param ancestorClass
+     * @param modelClass
+     * @param predicate
+     * @param bindingKeyFunction
+     * @param autowireCapableBeanFactory
+     * @param <T>                        推进器类
+     * @return Object是路由key
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     @Builder
     private static <T> List<Pair<Object, T>> build(ClassLoader classLoader, @NonNull @Singular Set<String> packageNames, Class enableAnnotationClass, Class ancestorClass, Class modelClass, Predicate<Class> predicate, Function<Class, Object[]> bindingKeyFunction, @NonNull AutowireCapableBeanFactory autowireCapableBeanFactory) throws IOException, ClassNotFoundException {
         Validate.notEmpty(packageNames, "packageNames is empty");

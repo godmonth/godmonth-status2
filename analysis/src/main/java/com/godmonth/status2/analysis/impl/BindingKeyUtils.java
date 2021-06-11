@@ -5,6 +5,7 @@ import com.godmonth.status2.annotations.binding.StatusBinding;
 import com.godmonth.status2.annotations.utils.AnnotationValueUtils;
 import com.godmonth.status2.annotations.utils.InstructionBindingUtils;
 import com.godmonth.status2.annotations.utils.StatusBindingUtils;
+import com.sun.istack.internal.NotNull;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -24,7 +25,14 @@ public class BindingKeyUtils {
         return getBindingKey(componentClass, null, null);
     }
 
-    public static Object[] getBindingKey(Class componentClass, AnnotationField statusField, AnnotationField instField) {
+
+    /**
+     * @param componentClass 推进器类或者是entry类
+     * @param statusField
+     * @param instField
+     * @return 如果没有instField，返回的是status list. 如果有instField返回的是pair list
+     */
+    public static Object[] getBindingKey(@NotNull Class componentClass, AnnotationField statusField, AnnotationField instField) {
         final Object[] statusKeyPart = getStatusPart(componentClass, statusField);
         Validate.notNull(statusKeyPart, "statusBindingKeyPart is null");
         Object instKeyPart = getInstructionBindingKeyPart(componentClass, instField);
@@ -39,7 +47,7 @@ public class BindingKeyUtils {
     }
 
     private static Object[] getStatusPart(Class componentClass, AnnotationField statusField) {
-        Object[] keyPart = getBindingKeyArrayPart(componentClass, statusField);
+        Object[] keyPart = getAnnotationValueArray(componentClass, statusField);
         if (keyPart != null) {
             return keyPart;
         }
@@ -52,7 +60,7 @@ public class BindingKeyUtils {
 
 
     private static Object getInstructionBindingKeyPart(Class componentClass, AnnotationField statusField) {
-        Object keyPart = getBindingKeyPart(componentClass, statusField);
+        Object keyPart = getAnnotationValue(componentClass, statusField);
         if (keyPart != null) {
             return keyPart;
         }
@@ -63,17 +71,31 @@ public class BindingKeyUtils {
         return keyPart;
     }
 
-    private static Object getBindingKeyPart(Class componentClass, AnnotationField statusField) {
-        if (statusField != null) {
-            Annotation annotation = AnnotationUtils.findAnnotation(componentClass, statusField.getAnnoClass());
+    /**
+     * 查询类的标签值
+     *
+     * @param componentClass
+     * @param annotationField
+     * @return
+     */
+    private static Object getAnnotationValue(Class componentClass, AnnotationField annotationField) {
+        if (annotationField != null) {
+            Annotation annotation = AnnotationUtils.findAnnotation(componentClass, annotationField.getAnnoClass());
             if (annotation != null) {
-                return AnnotationValueUtils.getValue(annotation, statusField.getPropertyName());
+                return AnnotationValueUtils.getValue(annotation, annotationField.getPropertyName());
             }
         }
         return null;
     }
 
-    private static Object[] getBindingKeyArrayPart(Class componentClass, AnnotationField annotationField) {
+    /**
+     * 查询类的标签的数组值
+     *
+     * @param componentClass
+     * @param annotationField
+     * @return
+     */
+    private static Object[] getAnnotationValueArray(@NotNull Class componentClass, AnnotationField annotationField) {
         if (annotationField != null) {
             Annotation annotation = AnnotationUtils.findAnnotation(componentClass, annotationField.getAnnoClass());
             if (annotation != null) {

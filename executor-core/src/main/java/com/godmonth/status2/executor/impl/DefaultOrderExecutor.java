@@ -32,7 +32,7 @@ public class DefaultOrderExecutor<MODEL, INST, TRIGGER> implements OrderExecutor
     private static final Logger logger = LoggerFactory.getLogger(DefaultOrderExecutor.class);
 
     @Setter
-    protected Function<Object, StatusAdvancer> advancerFunctions;
+    protected Function<Object, StatusAdvancer> advancerRouter;
 
     @Setter
     protected TxStatusTransitor<MODEL, TRIGGER> txStatusTransitor;
@@ -44,12 +44,12 @@ public class DefaultOrderExecutor<MODEL, INST, TRIGGER> implements OrderExecutor
     @Setter
     protected ModelAnalysis<MODEL> modelAnalysis;
 
-    public DefaultOrderExecutor(Function<Object, StatusAdvancer> advancerFunctions, TxStatusTransitor<MODEL, TRIGGER> txStatusTransitor, ExecutorService executorService, ModelAnalysis<MODEL> modelAnalysis) {
-        this.advancerFunctions = advancerFunctions;
+    public DefaultOrderExecutor(Function<Object, StatusAdvancer> advancerRouter, TxStatusTransitor<MODEL, TRIGGER> txStatusTransitor, ExecutorService executorService, ModelAnalysis<MODEL> modelAnalysis) {
+        this.advancerRouter = advancerRouter;
         this.txStatusTransitor = txStatusTransitor;
         this.executorService = executorService;
         this.modelAnalysis = modelAnalysis;
-        logger.trace("advancerFunctions:{}", advancerFunctions);
+        logger.trace("advancerFunctions:{}", advancerRouter);
     }
 
     public static Function<Object, StatusAdvancer> convert(List<Pair<Object, StatusAdvancer>> advancerBindings) {
@@ -62,12 +62,12 @@ public class DefaultOrderExecutor<MODEL, INST, TRIGGER> implements OrderExecutor
 
     public void setAdvancerBindingMap(Map<Object, StatusAdvancer> advancerMap) {
         logger.trace("advancerBindingMap:{}", advancerMap);
-        this.advancerFunctions = advancerMap::get;
+        this.advancerRouter = advancerMap::get;
     }
 
     public void setAdvancerBindingList(List<Pair<Object, StatusAdvancer>> advancerBindingList) {
         logger.trace("advancerBindingList:{}", advancerBindingList);
-        this.advancerFunctions = convert(advancerBindingList);
+        this.advancerRouter = convert(advancerBindingList);
     }
 
     protected SyncResult<MODEL, ?> execute1(MODEL model, INST instruction, Object message) {
@@ -79,10 +79,10 @@ public class DefaultOrderExecutor<MODEL, INST, TRIGGER> implements OrderExecutor
 
             StatusAdvancer<MODEL, INST, TRIGGER> advancer = null;
             if (instruction != null) {
-                advancer = advancerFunctions.apply(Pair.of(status, instruction));
+                advancer = advancerRouter.apply(Pair.of(status, instruction));
             }
             if (advancer == null) {
-                advancer = advancerFunctions.apply(status);
+                advancer = advancerRouter.apply(status);
             }
             logger.trace("advancer:{}", advancer);
             if (advancer == null) {
