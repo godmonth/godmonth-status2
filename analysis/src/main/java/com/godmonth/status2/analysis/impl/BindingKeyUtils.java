@@ -5,7 +5,6 @@ import com.godmonth.status2.annotations.binding.StatusBinding;
 import com.godmonth.status2.annotations.utils.AnnotationValueUtils;
 import com.godmonth.status2.annotations.utils.InstructionBindingUtils;
 import com.godmonth.status2.annotations.utils.StatusBindingUtils;
-import com.sun.istack.internal.NotNull;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -32,7 +31,7 @@ public class BindingKeyUtils {
      * @param instField
      * @return 如果没有instField，返回的是status list. 如果有instField返回的是pair list
      */
-    public static Object[] getBindingKey(@NotNull Class componentClass, AnnotationField statusField, AnnotationField instField) {
+    public static Object[] getBindingKey(Class componentClass, AnnotationField statusField, AnnotationField instField) {
         final Object[] statusKeyPart = getStatusPart(componentClass, statusField);
         Validate.notNull(statusKeyPart, "statusBindingKeyPart is null");
         Object instKeyPart = getInstructionBindingKeyPart(componentClass, instField);
@@ -95,7 +94,7 @@ public class BindingKeyUtils {
      * @param annotationField
      * @return
      */
-    private static Object[] getAnnotationValueArray(@NotNull Class componentClass, AnnotationField annotationField) {
+    private static Object[] getAnnotationValueArray(Class componentClass, AnnotationField annotationField) {
         if (annotationField != null) {
             Annotation annotation = AnnotationUtils.findAnnotation(componentClass, annotationField.getAnnoClass());
             if (annotation != null) {
