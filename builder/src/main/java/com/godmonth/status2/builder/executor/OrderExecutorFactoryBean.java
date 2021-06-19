@@ -129,7 +129,7 @@ public class OrderExecutorFactoryBean implements FactoryBean<OrderExecutor>, App
         com.godmonth.status2.executor.intf.OrderExecutor orderExecutor = null;
         try {
             List<Pair<Object, StatusAdvancer>> advancerBindingList = AdvancerBindingListBuilder.builder().classLoader(classLoader).autowireCapableBeanFactory(applicationContext.getAutowireCapableBeanFactory()).modelClass(stateMachineAnalysis.getModelAnalysis().getModelClass()).packageNames(advancerPackages).bindingKeyFunction(stateMachineAnalysis.getBindingKeyFunction()).build();
-            logger.trace("advancerBindingList:{}", advancerBindingList);
+            logger.trace("model:{},advancerBindingList:{}", stateMachineAnalysis.getModelAnalysis().getModelClass().getName(), advancerBindingList);
             //advancerBindingList.add(xxx);增加你需要定制的推进器
             final DefaultOrderExecutor.DefaultOrderExecutorBuilder builder = DefaultOrderExecutor.builder().modelAnalysis(stateMachineAnalysis.getModelAnalysis()).advancerRouterList(advancerBindingList).txStatusTransitor(txStatusTransitor);
             if (executorService != null) {
@@ -167,7 +167,7 @@ public class OrderExecutorFactoryBean implements FactoryBean<OrderExecutor>, App
         Function function = JsonDefinitionBuilder.builder().resource(configResource).statusClass(analysis.getModelAnalysis().getStatusClass()).triggerClass(analysis.getModelAnalysis().getTriggerClass()).build();
         final SimpleStatusTransitor simpleStatusTransitor = new SimpleStatusTransitor(function);
         List<Pair<Object, StatusEntry>> statusEntryList = StatusEntryBindingListBuilder.builder().classLoader(classLoader).autowireCapableBeanFactory(beanFactory).packageNames(entryPackages).bindingKeyFunction(analysis.getBindingKeyFunction()).build();
-        logger.trace("statusEntryList:{}", statusEntryList);
+        logger.trace("model:{},statusEntryList:{}", analysis.getModelAnalysis().getModelClass().getName(), statusEntryList);
         return TxStatusTransitorImpl.builder().modelMerger(entityManager::merge).transactionOperations(transactionOperations).modelAnalysis(analysis.getModelAnalysis()).statusTransitor(simpleStatusTransitor).statusEntryBindList(statusEntryList).build();
     }
 }
