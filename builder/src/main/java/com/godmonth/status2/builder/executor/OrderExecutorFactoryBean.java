@@ -166,7 +166,8 @@ public class OrderExecutorFactoryBean implements FactoryBean<OrderExecutor>, App
     private TxStatusTransitor txStatusTransitor(AutowireCapableBeanFactory beanFactory, EntityManager entityManager, TransactionOperations transactionOperations, StateMachineAnalysis analysis, Resource configResource, Set<String> entryPackages) throws IOException, ClassNotFoundException {
         Function function = JsonDefinitionBuilder.builder().resource(configResource).statusClass(analysis.getModelAnalysis().getStatusClass()).triggerClass(analysis.getModelAnalysis().getTriggerClass()).build();
         final SimpleStatusTransitor simpleStatusTransitor = new SimpleStatusTransitor(function);
-        List<Pair<Object, StatusEntry>> pairList = StatusEntryBindingListBuilder.builder().classLoader(classLoader).autowireCapableBeanFactory(beanFactory).packageNames(entryPackages).bindingKeyFunction(analysis.getBindingKeyFunction()).build();
-        return TxStatusTransitorImpl.builder().modelMerger(entityManager::merge).transactionOperations(transactionOperations).modelAnalysis(analysis.getModelAnalysis()).statusTransitor(simpleStatusTransitor).statusEntryBindList(pairList).build();
+        List<Pair<Object, StatusEntry>> statusEntryList = StatusEntryBindingListBuilder.builder().classLoader(classLoader).autowireCapableBeanFactory(beanFactory).packageNames(entryPackages).bindingKeyFunction(analysis.getBindingKeyFunction()).build();
+        logger.trace("statusEntryList:{}", statusEntryList);
+        return TxStatusTransitorImpl.builder().modelMerger(entityManager::merge).transactionOperations(transactionOperations).modelAnalysis(analysis.getModelAnalysis()).statusTransitor(simpleStatusTransitor).statusEntryBindList(statusEntryList).build();
     }
 }
