@@ -1,5 +1,6 @@
 package com.godmonth.status2.builder.executor;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ContextedRuntimeException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanClassLoaderAware;
@@ -15,6 +16,7 @@ import java.util.Map;
  *
  * @author shenyue
  */
+@Slf4j
 public class OrderExecutorBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar, BeanClassLoaderAware {
     private ClassLoader classLoader;
 
@@ -27,8 +29,6 @@ public class OrderExecutorBeanDefinitionRegistrar implements ImportBeanDefinitio
         }
 
         final Map<String, Object> annotationAttributes = importingClassMetadata.getAnnotationAttributes(OrderExecutor.class.getName());
-
-
         GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
         beanDefinition.setBeanClassName(OrderExecutorFactoryBean.class.getName());
         MutablePropertyValues values = new MutablePropertyValues();
@@ -37,6 +37,7 @@ public class OrderExecutorBeanDefinitionRegistrar implements ImportBeanDefinitio
         values.addPropertyValue("classLoader", classLoader);
         beanDefinition.setPropertyValues(values);
         final String beanName = (String) annotationAttributes.get("beanName");
+        log.debug("executor beanName:{}", beanName);
         registry.registerBeanDefinition(beanName, beanDefinition);
     }
 
