@@ -38,6 +38,11 @@ public class AdvancedResult<MODEL, TRIGGER> {
     private NextInstruction nextInstruction;
 
     /**
+     * 在推进器内修改了模型
+     */
+    private MODEL updatedModel;
+
+    /**
      * @param triggerBehavior
      */
     public AdvancedResult(TriggerBehavior<TRIGGER, MODEL> triggerBehavior) {
