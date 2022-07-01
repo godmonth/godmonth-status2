@@ -95,6 +95,9 @@ public class DefaultOrderExecutor<MODEL, INST, TRIGGER> implements OrderExecutor
                 break;
             }
             if (advancedResult.getTriggerBehavior() != null) {
+                if (advancedResult.getUpdatedModel() != null) {
+                    model = advancedResult.getUpdatedModel();
+                }
                 model = txStatusTransitor.transit(model, advancedResult.getTriggerBehavior());
                 Validate.notNull(model, "transited model is null.");
                 if (advancedResult.getNextInstruction() != null) {

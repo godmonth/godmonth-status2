@@ -31,11 +31,16 @@ public class AdvancedResult<MODEL, TRIGGER> {
      */
     @Builder.Default
     private NextOperation nextOperation = NextOperation.ADVANCE;
-    
+
     /**
      * 丢弃指令
      */
     private NextInstruction nextInstruction;
+
+    /**
+     * 在推进器内修改了模型
+     */
+    private MODEL updatedModel;
 
     /**
      * @param triggerBehavior
