@@ -87,7 +87,6 @@
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
-                    <charset>utf-8</charset>
                     <encoding>utf-8</encoding>
                     <doclint>none</doclint>
                 </configuration>
@@ -97,7 +96,6 @@
                         <goals>
                             <goal>jar</goal>
                         </goals>
-
                     </execution>
                 </executions>
             </plugin>
@@ -179,7 +177,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.16</version>
+            <version>1.18.22</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
