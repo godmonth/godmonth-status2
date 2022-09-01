@@ -10,6 +10,7 @@ import com.godmonth.status2.executor.intf.OrderExecutor;
 import com.godmonth.status2.executor.intf.SyncResult;
 import com.godmonth.status2.transitor.tx.intf.TxStatusTransitor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.lang3.Validate;
@@ -33,7 +34,7 @@ public class DefaultOrderExecutor<MODEL, INST, TRIGGER> implements OrderExecutor
 
     @Setter
     protected Function<Object, StatusAdvancer> advancerRouter;
-
+    @Getter
     @Setter
     protected TxStatusTransitor<MODEL, TRIGGER> txStatusTransitor;
 
