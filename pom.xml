@@ -45,9 +45,9 @@
     </scm>
     <distributionManagement>
         <snapshotRepository>
-            <id>maven-snapshots</id>
-            <name>payby Internal Repository</name>
-            <url>http://nexus.test2pay.com/repository/maven-snapshots</url>
+            <id>bonus-maven-snapshots</id>
+            <url>https://sdk.platon.network/nexus/repository/maven-snapshots</url>
+            <uniqueVersion>false</uniqueVersion>
         </snapshotRepository>
     </distributionManagement>
     <build>
