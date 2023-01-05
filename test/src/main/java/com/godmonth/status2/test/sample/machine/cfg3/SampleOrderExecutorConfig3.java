@@ -62,7 +62,7 @@ public class SampleOrderExecutorConfig3 {
      */
     @Bean
     public OrderExecutor<SampleModel, Object> sampleModelOrderExecutor(AutowireCapableBeanFactory beanFactory, @Qualifier("sampleStateMachineAnalysis") StateMachineAnalysis sampleStateMachineAnalysis, @Qualifier("sampleStatusTxStatusTransitor") TxStatusTransitor txStatusTransitor) throws IOException, ClassNotFoundException {
-        List<Pair<Object, StatusAdvancer>> advancerBindingList = AdvancerBindingListBuilder.builder().autowireCapableBeanFactory(beanFactory).modelClass(SampleModel.class).packageName("com.godmonth.status2.test.sample.machine.advancer").bindingKeyFunction(sampleStateMachineAnalysis.getBindingKeyFunction()).build();
+        List<Pair<Object, StatusAdvancer>> advancerBindingList = AdvancerBindingListBuilder.builder().classLoader(ClassLoader.getSystemClassLoader()).autowireCapableBeanFactory(beanFactory).modelClass(SampleModel.class).packageName("com.godmonth.status2.test.sample.machine.advancer").bindingKeyFunction(sampleStateMachineAnalysis.getBindingKeyFunction()).build();
         //advancerBindingList.add(xxx);增加你需要定制的推进器
         return DefaultOrderExecutor.builder().modelAnalysis(sampleStateMachineAnalysis.getModelAnalysis()).advancerRouterList(advancerBindingList).txStatusTransitor(txStatusTransitor).build();
     }
@@ -72,7 +72,7 @@ public class SampleOrderExecutorConfig3 {
     public TxStatusTransitor sampleStatusTxStatusTransitor(AutowireCapableBeanFactory beanFactory, @Qualifier("e2") EntityManager entityManager, @Qualifier("tt2") TransactionOperations transactionOperations, @Qualifier("sampleStateMachineAnalysis") StateMachineAnalysis sampleStateMachineAnalysis, @Value("classpath:/sample-status.json") Resource configResource) throws IOException, ClassNotFoundException {
         Function<SampleStatus, Function<SampleTrigger, SampleStatus>> function = JsonDefinitionBuilder.<SampleStatus, SampleTrigger>builder().resource(configResource).statusClass(sampleStateMachineAnalysis.getModelAnalysis().getStatusClass()).triggerClass(sampleStateMachineAnalysis.getModelAnalysis().getTriggerClass()).build();
         final SimpleStatusTransitor simpleStatusTransitor = new SimpleStatusTransitor(function);
-        List<Pair<Object, StatusEntry>> pairList = StatusEntryBindingListBuilder.builder().autowireCapableBeanFactory(beanFactory).packageName("com.godmonth.status2.test.sample.machine.entry").bindingKeyFunction(sampleStateMachineAnalysis.getBindingKeyFunction()).build();
+        List<Pair<Object, StatusEntry>> pairList = StatusEntryBindingListBuilder.builder().classLoader(ClassLoader.getSystemClassLoader()).autowireCapableBeanFactory(beanFactory).packageName("com.godmonth.status2.test.sample.machine.entry").bindingKeyFunction(sampleStateMachineAnalysis.getBindingKeyFunction()).build();
         //statusEntryBindList.add(vvv);加你需要定制的入口回调
         return TxStatusTransitorImpl.builder().modelMerger(entityManager::merge).transactionOperations(transactionOperations).modelAnalysis(sampleStateMachineAnalysis.getModelAnalysis()).statusTransitor(simpleStatusTransitor).statusEntryBindList(pairList).build();
     }

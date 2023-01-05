@@ -22,7 +22,7 @@ class AdvancerBindingListBuilderTest {
     void name() throws IOException, ClassNotFoundException {
         AutowireCapableBeanFactory factory = Mockito.mock(AutowireCapableBeanFactory.class);
         Mockito.when(factory.autowire(Mockito.same(PayAdvancer.class), Mockito.anyInt(), Mockito.anyBoolean())).thenReturn(statusAdvancer);
-        List<Pair<Object, StatusAdvancer>> build = AdvancerBindingListBuilder.builder().autowireCapableBeanFactory(factory).modelClass(SampleModel.class).packageName("com.godmonth.status.builder.advancer").build();
+        List<Pair<Object, StatusAdvancer>> build = AdvancerBindingListBuilder.builder().classLoader(ClassLoader.getSystemClassLoader()).autowireCapableBeanFactory(factory).modelClass(SampleModel.class).packageName("com.godmonth.status.builder.advancer").build();
         System.out.println(build);
     }
 
