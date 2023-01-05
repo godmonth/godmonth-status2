@@ -50,7 +50,7 @@ public class BindingListBuilder {
         for (String packageName : packageNames) {
             ImmutableSet<ClassPath.ClassInfo> topLevelClasses = classPath.getTopLevelClassesRecursive(packageName);
             for (ClassPath.ClassInfo topLevelClass : topLevelClasses) {
-                Class<?> aClass = Class.forName(topLevelClass.getName());
+                Class<?> aClass = classLoader.loadClass(topLevelClass.getName());
 
                 //检查激活标志
                 if (enableAnnotationClass != null && AnnotationUtils.findAnnotation(aClass, enableAnnotationClass) == null) {

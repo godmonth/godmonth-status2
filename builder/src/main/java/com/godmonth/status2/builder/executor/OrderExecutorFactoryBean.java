@@ -12,6 +12,7 @@ import com.godmonth.status2.transitor.tx.impl.TxStatusTransitorImpl;
 import com.godmonth.status2.transitor.tx.intf.StatusEntry;
 import com.godmonth.status2.transitor.tx.intf.TxStatusTransitor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ContextedRuntimeException;
@@ -31,11 +32,7 @@ import org.springframework.transaction.support.TransactionOperations;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 
@@ -44,7 +41,7 @@ import java.util.function.Function;
  *
  * @author shenyue
  */
-
+@Slf4j
 public class OrderExecutorFactoryBean implements FactoryBean<OrderExecutor>, ApplicationContextAware {
     private static final Logger logger = LoggerFactory.getLogger(OrderExecutorFactoryBean.class);
 
@@ -61,8 +58,11 @@ public class OrderExecutorFactoryBean implements FactoryBean<OrderExecutor>, App
 
     @Override
     public com.godmonth.status2.executor.intf.OrderExecutor getObject() throws Exception {
+        log.trace("annotationAttributes:{}", annotationAttributes);
+        log.trace("underlyClass:{}", underlyClass);
+        log.trace("classLoader:{}", classLoader);
         final Package defaultPackage = underlyClass.getPackage();
-
+        log.trace("defaultPackage:{}", defaultPackage);
         final String stateMachineAnalysisRef = (String) annotationAttributes.get("stateMachineAnalysisRef");
         StateMachineAnalysis stateMachineAnalysis = null;
         if (StringUtils.isNotBlank(stateMachineAnalysisRef)) {
@@ -99,9 +99,6 @@ public class OrderExecutorFactoryBean implements FactoryBean<OrderExecutor>, App
             executorService = (ExecutorService) applicationContext.getBean(threadPoolRef);
         }
 
-        final String stateMachineDefinitionResourceStr = (String) annotationAttributes.get("stateMachineDefinitionResource");
-        ResourceLoader resourceLoader = new DefaultResourceLoader();
-        final Resource stateMachineDefinitionResource = resourceLoader.getResource(stateMachineDefinitionResourceStr);
 
         String[] entryBasePackages = (String[]) annotationAttributes.get("entryBasePackages");
 
@@ -112,6 +109,9 @@ public class OrderExecutorFactoryBean implements FactoryBean<OrderExecutor>, App
             entryPackages.add(defaultPackage.getName());
         }
 
+        final String stateMachineDefinitionResourceStr = (String) annotationAttributes.get("stateMachineDefinitionResource");
+        ResourceLoader resourceLoader = new DefaultResourceLoader(classLoader);
+        final Resource stateMachineDefinitionResource = resourceLoader.getResource(stateMachineDefinitionResourceStr);
         TxStatusTransitor txStatusTransitor = null;
         try {
             txStatusTransitor = txStatusTransitor(applicationContext.getAutowireCapableBeanFactory(), entityManager, transactionOperations, stateMachineAnalysis, stateMachineDefinitionResource, entryPackages);
@@ -119,7 +119,7 @@ public class OrderExecutorFactoryBean implements FactoryBean<OrderExecutor>, App
             throw new ContextedRuntimeException(e);
         }
         String[] advancerBasePackages = (String[]) annotationAttributes.get("advancerBasePackages");
-
+        log.trace("advancerBasePackages:{}", advancerBasePackages);
         Set<String> advancerPackages = new HashSet<>();
         if (ArrayUtils.isNotEmpty(advancerBasePackages)) {
             advancerPackages.addAll(Arrays.asList(advancerBasePackages));

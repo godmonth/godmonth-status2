@@ -23,7 +23,8 @@ public class OrderExecutorBeanDefinitionRegistrar implements ImportBeanDefinitio
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
         Class underlyClass = null;
         try {
-            underlyClass = Class.forName(importingClassMetadata.getClassName());
+            log.trace("underlyClass:{}", importingClassMetadata.getClassName());
+            underlyClass = classLoader.loadClass(importingClassMetadata.getClassName());
         } catch (ClassNotFoundException e) {
             throw new ContextedRuntimeException(e);
         }
