@@ -47,39 +47,29 @@ public class BindingListBuilder {
         List<Pair<Object, T>> list = new ArrayList<>();
 
         for (String packageName : packageNames) {
-            log.trace("packageName:{}", packageName);
             Set<Class<?>> topLevelClasses = TopClassesSearcher.searchTopClasses(packageName, classLoader);
-            log.trace("topLevelClasses.size:{}", topLevelClasses.size());
             for (Class<?> topLevelClass : topLevelClasses) {
                 //检查激活标志
                 if (enableAnnotationClass != null && AnnotationUtils.findAnnotation(topLevelClass, enableAnnotationClass) == null) {
-                    log.trace("skip:{}", topLevelClass);
                     continue;
                 }
-
                 //检查父类
                 if (ancestorClass != null && !ancestorClass.isAssignableFrom(topLevelClass)) {
-                    log.trace("skip:{}", topLevelClass);
                     continue;
                 }
-
                 //匹配模型
                 if (modelClass != null) {
                     ModelBinding modelBinding = AnnotationUtils.findAnnotation(topLevelClass, ModelBinding.class);
                     if (modelBinding != null && !modelClass.equals(modelBinding.value())) {
-                        log.trace("skip:{}", topLevelClass);
                         continue;
                     }
                 }
-
                 //过滤断言
                 if (predicate != null && !predicate.test(topLevelClass)) {
-                    log.trace("skip:{}", topLevelClass);
                     continue;
                 }
                 final List<Pair<Object, T>> byAnnotation = createByAnnotation(topLevelClass, autowireCapableBeanFactory, bindingKeyFunction);
                 if (byAnnotation != null) {
-                    log.trace("byAnnotation:{}", byAnnotation);
                     list.addAll(byAnnotation);
                 }
             }
