@@ -2,8 +2,6 @@ package com.godmonth.status2.builder.binding;
 
 import com.godmonth.status2.analysis.impl.BindingKeyUtils;
 import com.godmonth.status2.annotations.binding.ModelBinding;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.reflect.ClassPath;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Singular;
@@ -42,45 +40,51 @@ public class BindingListBuilder {
      * @throws ClassNotFoundException
      */
     @Builder
-    private static <T> List<Pair<Object, T>> build(ClassLoader classLoader, @NonNull @Singular Set<String> packageNames, Class enableAnnotationClass, Class ancestorClass, Class modelClass, Predicate<Class> predicate, Function<Class, Object[]> bindingKeyFunction, @NonNull AutowireCapableBeanFactory autowireCapableBeanFactory) throws IOException, ClassNotFoundException {
+    private static <T> List<Pair<Object, T>> build(@NonNull ClassLoader classLoader, @NonNull @Singular Set<String> packageNames, Class enableAnnotationClass, Class ancestorClass, Class modelClass, Predicate<Class> predicate, Function<Class, Object[]> bindingKeyFunction, @NonNull AutowireCapableBeanFactory autowireCapableBeanFactory) throws IOException, ClassNotFoundException {
+        log.trace("start building list:{},packageNames:{}", enableAnnotationClass, packageNames);
         Validate.notEmpty(packageNames, "packageNames is empty");
         bindingKeyFunction = bindingKeyFunction != null ? bindingKeyFunction : BindingKeyUtils::getBindingKey;
         List<Pair<Object, T>> list = new ArrayList<>();
-        ClassPath classPath = ClassPath.from(classLoader != null ? classLoader : ClassLoader.getSystemClassLoader());
-        for (String packageName : packageNames) {
-            ImmutableSet<ClassPath.ClassInfo> topLevelClasses = classPath.getTopLevelClassesRecursive(packageName);
-            for (ClassPath.ClassInfo topLevelClass : topLevelClasses) {
-                Class<?> aClass = classLoader.loadClass(topLevelClass.getName());
 
+        for (String packageName : packageNames) {
+            log.trace("packageName:{}", packageName);
+            Set<Class<?>> topLevelClasses = TopClassesSearcher.searchTopClasses(packageName, classLoader);
+            log.trace("topLevelClasses.size:{}", topLevelClasses.size());
+            for (Class<?> topLevelClass : topLevelClasses) {
                 //检查激活标志
-                if (enableAnnotationClass != null && AnnotationUtils.findAnnotation(aClass, enableAnnotationClass) == null) {
+                if (enableAnnotationClass != null && AnnotationUtils.findAnnotation(topLevelClass, enableAnnotationClass) == null) {
+                    log.trace("skip:{}", topLevelClass);
                     continue;
                 }
 
                 //检查父类
-                if (ancestorClass != null && !ancestorClass.isAssignableFrom(aClass)) {
+                if (ancestorClass != null && !ancestorClass.isAssignableFrom(topLevelClass)) {
+                    log.trace("skip:{}", topLevelClass);
                     continue;
                 }
 
                 //匹配模型
                 if (modelClass != null) {
-                    ModelBinding modelBinding = AnnotationUtils.findAnnotation(aClass, ModelBinding.class);
+                    ModelBinding modelBinding = AnnotationUtils.findAnnotation(topLevelClass, ModelBinding.class);
                     if (modelBinding != null && !modelClass.equals(modelBinding.value())) {
+                        log.trace("skip:{}", topLevelClass);
                         continue;
                     }
                 }
 
                 //过滤断言
-                if (predicate != null && !predicate.test(aClass)) {
+                if (predicate != null && !predicate.test(topLevelClass)) {
+                    log.trace("skip:{}", topLevelClass);
                     continue;
                 }
-                final List<Pair<Object, T>> byAnnotation = createByAnnotation(aClass, autowireCapableBeanFactory, bindingKeyFunction);
+                final List<Pair<Object, T>> byAnnotation = createByAnnotation(topLevelClass, autowireCapableBeanFactory, bindingKeyFunction);
                 if (byAnnotation != null) {
+                    log.trace("byAnnotation:{}", byAnnotation);
                     list.addAll(byAnnotation);
                 }
             }
         }
-        log.debug("binding list:{}", list);
+        log.debug("finished binding list:{}", list);
         return list;
     }
 
