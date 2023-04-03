@@ -72,6 +72,7 @@ public class DefaultOrderExecutor<MODEL, INST, TRIGGER> implements OrderExecutor
     }
 
     protected SyncResult<MODEL, ?> execute1(MODEL model, INST instruction, Object message) {
+        logger.trace("execute1:{}", model);
         modelAnalysis.validate(model);
         AdvancedResult<MODEL, TRIGGER> advancedResult = null;
         while (true) {
