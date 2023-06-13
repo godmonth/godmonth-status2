@@ -39,11 +39,8 @@ public class DefaultOrderExecutorTest {
     public static void prepare() {
         TypeFieldPredicate typeFieldPredicate = TypeFieldPredicate.builder().propertyName("type").expectedValue("test").build();
         final ModelAnalysis<SampleModel> modelAnalysis = SimpleBeanModelAnalysis.<SampleModel>builder().modelClass(SampleModel.class).statusPropertyName("status").statusClass(SampleStatus.class).triggerClass(SampleTrigger.class).build();
-        DefaultOrderExecutor<SampleModel, Object, SampleTrigger> defaultOrderExecutor = new DefaultOrderExecutor<>();
-        defaultOrderExecutor.setModelAnalysis(modelAnalysis);
         Map<Object, StatusAdvancer> advancerMap = new HashMap<>();
         advancerMap.put(SampleStatus.CREATED, advanceRequest -> new AdvancedResult<>(new TriggerBehavior<>(SampleTrigger.PAY)));
-        defaultOrderExecutor.setAdvancerRouterMap(advancerMap);
 
         TxStatusTransitorImpl<SampleModel, SampleStatus, SampleTrigger> txStatusTransitor = new TxStatusTransitorImpl<>();
         SimpleStatusTransitor<SampleStatus, SampleTrigger> statusTransitor = new SimpleStatusTransitor<>(
@@ -55,9 +52,8 @@ public class DefaultOrderExecutorTest {
         txStatusTransitor.setStatusEntryFunction(sampleStatusStatusEntryMap::get);
         txStatusTransitor.setModelMerger(sampleModel -> sampleModel);
         txStatusTransitor.setTransactionOperations(TransactionOperations.withoutTransaction());
-        defaultOrderExecutor.setTxStatusTransitor(txStatusTransitor);
 
-        orderExecutor = defaultOrderExecutor;
+        orderExecutor = new DefaultOrderExecutor<>(advancerMap, txStatusTransitor, null, modelAnalysis);
     }
 
     private static void print(TransitedResult transitedResult) {

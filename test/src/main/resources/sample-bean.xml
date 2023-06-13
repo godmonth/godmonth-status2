@@ -20,7 +20,8 @@
           c:_0="com.godmonth.status2.test.sample.domain.SampleModel"/>
 
     <bean id="sampleModelExecutor" class="com.godmonth.status2.executor.impl.DefaultOrderExecutor"
-          p:txStatusTransitor-ref="sampleModelStatusTransitor" p:modelAnalysis-ref="sampleModelAnalysis">
+          p:txStatusTransitor-ref="sampleModelStatusTransitor" p:modelAnalysis-ref="sampleModelAnalysis"
+          init-method="init">
         <property name="advancerRouterMap">
             <map>
                 <entry>

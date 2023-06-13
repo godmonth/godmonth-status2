@@ -9,15 +9,19 @@ import com.godmonth.status2.executor.intf.ExecutionRequest;
 import com.godmonth.status2.executor.intf.OrderExecutor;
 import com.godmonth.status2.executor.intf.SyncResult;
 import com.godmonth.status2.transitor.tx.intf.TxStatusTransitor;
-import lombok.Builder;
+import com.google.common.util.concurrent.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,34 +30,64 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 
+@Slf4j
 @NoArgsConstructor
-@Builder
 public class DefaultOrderExecutor<MODEL, INST, TRIGGER> implements OrderExecutor<MODEL, INST> {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultOrderExecutor.class);
 
-    @Setter
     protected Function<Object, StatusAdvancer> advancerRouter;
     @Getter
     @Setter
     protected TxStatusTransitor<MODEL, TRIGGER> txStatusTransitor;
 
-    @Builder.Default
     @Setter
     protected ExecutorService executorService = Executors.newCachedThreadPool();
+
+    private ListeningExecutorService listeningExecutorService;
+    private boolean innerBuild;
 
     @Setter
     protected ModelAnalysis<MODEL> modelAnalysis;
 
+    public DefaultOrderExecutor(List<Pair<Object, StatusAdvancer>> advancerBindings, TxStatusTransitor<MODEL, TRIGGER> txStatusTransitor, ExecutorService executorService, ModelAnalysis<MODEL> modelAnalysis) {
+        this(convert(advancerBindings), txStatusTransitor, executorService, modelAnalysis);
+    }
+
+    public DefaultOrderExecutor(Map<Object, StatusAdvancer> advancerRouterMap, TxStatusTransitor<MODEL, TRIGGER> txStatusTransitor, ExecutorService executorService, ModelAnalysis<MODEL> modelAnalysis) {
+        this(advancerRouterMap::get, txStatusTransitor, executorService, modelAnalysis);
+    }
+
+    @PostConstruct
+    public void init() {
+        if (this.executorService instanceof ListeningExecutorService) {
+            listeningExecutorService = (ListeningExecutorService) this.executorService;
+            innerBuild = true;
+        } else {
+            listeningExecutorService = MoreExecutors.listeningDecorator(this.executorService);
+        }
+    }
+
     public DefaultOrderExecutor(Function<Object, StatusAdvancer> advancerRouter, TxStatusTransitor<MODEL, TRIGGER> txStatusTransitor, ExecutorService executorService, ModelAnalysis<MODEL> modelAnalysis) {
         this.advancerRouter = advancerRouter;
+        logger.trace("advancerRouter:{}", advancerRouter);
         this.txStatusTransitor = txStatusTransitor;
-        this.executorService = executorService;
+        if (executorService != null) {
+            this.executorService = executorService;
+        }
         this.modelAnalysis = modelAnalysis;
-        logger.trace("advancerFunctions:{}", advancerRouter);
+        init();
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        if (listeningExecutorService != null && innerBuild) {
+            listeningExecutorService.shutdown();
+        }
     }
 
     public static Function<Object, StatusAdvancer> convert(List<Pair<Object, StatusAdvancer>> advancerBindings) {
+        logger.trace("advancerBindingList:{}", advancerBindings);
         Map<Object, StatusAdvancer> advancerMap = new HashMap<>();
         for (Pair<Object, StatusAdvancer> advancerBinding : advancerBindings) {
             advancerMap.put(advancerBinding.getKey(), advancerBinding.getValue());
@@ -65,6 +99,7 @@ public class DefaultOrderExecutor<MODEL, INST, TRIGGER> implements OrderExecutor
         logger.trace("advancerRouterMap:{}", advancerRouterMap);
         this.advancerRouter = advancerRouterMap::get;
     }
+
 
     public void setAdvancerRouterList(List<Pair<Object, StatusAdvancer>> advancerRouterList) {
         logger.trace("advancerBindingList:{}", advancerRouterList);
@@ -119,7 +154,7 @@ public class DefaultOrderExecutor<MODEL, INST, TRIGGER> implements OrderExecutor
                         continue;
                     case ASYNC_ADVANCE:
                         logger.trace("executeAsync");
-                        executeAsync1(model, instruction, message);
+                        innerAsnnc(model, instruction, message);
                         break;
                     case PAUSE:
                         logger.trace("pause");
@@ -143,22 +178,31 @@ public class DefaultOrderExecutor<MODEL, INST, TRIGGER> implements OrderExecutor
 
     @Override
     public Future<SyncResult<MODEL, ?>> executeAsync(ExecutionRequest<MODEL, INST> req) {
-        modelAnalysis.validate(req.getModel());
-        return executeAsync1(req.getModel(), req.getInstruction(), req.getMessage());
+        return executeAsync2(req);
     }
 
-    protected Future<SyncResult<MODEL, ?>> executeAsync1(MODEL model, INST instruction, Object message) {
-        return executorService.submit(() -> execute1(model, instruction, message));
+    @Override
+    public ListenableFuture<SyncResult<MODEL, ?>> executeAsync2(ExecutionRequest<MODEL, INST> executionRequest) {
+        modelAnalysis.validate(executionRequest.getModel());
+        return innerAsnnc(executionRequest.getModel(), executionRequest.getInstruction(), executionRequest.getMessage());
     }
 
-    public static class DefaultOrderExecutorBuilder<MODEL, INST, TRIGGER> {
-        private Function<Object, StatusAdvancer> advancerRouter;
-
-        public DefaultOrderExecutorBuilder advancerRouterList(List<Pair<Object, StatusAdvancer>> advancerRouterList) {
-            this.advancerRouter = convert(advancerRouterList);
-            return this;
+    private FutureCallback<SyncResult<MODEL, ?>> futureCallback = new FutureCallback<SyncResult<MODEL, ?>>() {
+        @Override
+        public void onSuccess(@Nullable SyncResult<MODEL, ?> result) {
         }
 
+        @Override
+        public void onFailure(Throwable t) {
+            log.error("", t);
+        }
+    };
+
+    protected ListenableFuture<SyncResult<MODEL, ?>> innerAsnnc(MODEL model, INST instruction, Object message) {
+        ListenableFuture<SyncResult<MODEL, ?>> future = listeningExecutorService.submit(() -> execute1(model, instruction, message));
+        Futures.addCallback(future, futureCallback, executorService);
+        return future;
     }
+
 
 }
