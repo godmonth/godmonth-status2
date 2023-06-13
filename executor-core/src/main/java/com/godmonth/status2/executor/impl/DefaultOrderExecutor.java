@@ -10,6 +10,7 @@ import com.godmonth.status2.executor.intf.OrderExecutor;
 import com.godmonth.status2.executor.intf.SyncResult;
 import com.godmonth.status2.transitor.tx.intf.TxStatusTransitor;
 import com.google.common.util.concurrent.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -50,6 +51,26 @@ public class DefaultOrderExecutor<MODEL, INST, TRIGGER> implements OrderExecutor
     @Setter
     protected ModelAnalysis<MODEL> modelAnalysis;
 
+    @PostConstruct
+    public void init() {
+        if (executorService != null) {
+            if (this.executorService instanceof ListeningExecutorService) {
+                listeningExecutorService = (ListeningExecutorService) executorService;
+            } else {
+                listeningExecutorService = MoreExecutors.listeningDecorator(executorService);
+                innerBuild = true;
+            }
+        }
+    }
+
+    @PreDestroy
+    public void close() {
+        if (listeningExecutorService != null && innerBuild) {
+            listeningExecutorService.shutdown();
+        }
+    }
+
+    @Builder
     public DefaultOrderExecutor(List<Pair<Object, StatusAdvancer>> advancerBindings, TxStatusTransitor<MODEL, TRIGGER> txStatusTransitor, ExecutorService executorService, ModelAnalysis<MODEL> modelAnalysis) {
         this(convert(advancerBindings), txStatusTransitor, executorService, modelAnalysis);
     }
@@ -58,15 +79,6 @@ public class DefaultOrderExecutor<MODEL, INST, TRIGGER> implements OrderExecutor
         this(advancerRouterMap::get, txStatusTransitor, executorService, modelAnalysis);
     }
 
-    @PostConstruct
-    public void init() {
-        if (this.executorService instanceof ListeningExecutorService) {
-            listeningExecutorService = (ListeningExecutorService) this.executorService;
-            innerBuild = true;
-        } else {
-            listeningExecutorService = MoreExecutors.listeningDecorator(this.executorService);
-        }
-    }
 
     public DefaultOrderExecutor(Function<Object, StatusAdvancer> advancerRouter, TxStatusTransitor<MODEL, TRIGGER> txStatusTransitor, ExecutorService executorService, ModelAnalysis<MODEL> modelAnalysis) {
         this.advancerRouter = advancerRouter;
@@ -79,25 +91,27 @@ public class DefaultOrderExecutor<MODEL, INST, TRIGGER> implements OrderExecutor
         init();
     }
 
-    @PreDestroy
-    public void shutdown() {
-        if (listeningExecutorService != null && innerBuild) {
-            listeningExecutorService.shutdown();
-        }
-    }
 
     public static Function<Object, StatusAdvancer> convert(List<Pair<Object, StatusAdvancer>> advancerBindings) {
         logger.trace("advancerBindingList:{}", advancerBindings);
-        Map<Object, StatusAdvancer> advancerMap = new HashMap<>();
-        for (Pair<Object, StatusAdvancer> advancerBinding : advancerBindings) {
-            advancerMap.put(advancerBinding.getKey(), advancerBinding.getValue());
+        if (advancerBindings != null) {
+            Map<Object, StatusAdvancer> advancerMap = new HashMap<>();
+            for (Pair<Object, StatusAdvancer> advancerBinding : advancerBindings) {
+                advancerMap.put(advancerBinding.getKey(), advancerBinding.getValue());
+            }
+            return advancerMap::get;
+        } else {
+            return null;
         }
-        return advancerMap::get;
     }
 
     public void setAdvancerRouterMap(Map<Object, StatusAdvancer> advancerRouterMap) {
         logger.trace("advancerRouterMap:{}", advancerRouterMap);
-        this.advancerRouter = advancerRouterMap::get;
+        if (advancerRouterMap != null) {
+            this.advancerRouter = advancerRouterMap::get;
+        } else {
+            this.advancerRouter = null;
+        }
     }
 
 

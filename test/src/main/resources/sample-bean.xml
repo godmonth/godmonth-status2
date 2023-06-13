@@ -21,7 +21,7 @@
 
     <bean id="sampleModelExecutor" class="com.godmonth.status2.executor.impl.DefaultOrderExecutor"
           p:txStatusTransitor-ref="sampleModelStatusTransitor" p:modelAnalysis-ref="sampleModelAnalysis"
-          init-method="init">
+          init-method="init" destroy-method="close">
         <property name="advancerRouterMap">
             <map>
                 <entry>

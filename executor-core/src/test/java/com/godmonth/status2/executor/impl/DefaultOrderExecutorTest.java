@@ -16,4 +16,11 @@ class DefaultOrderExecutorTest {
         DefaultOrderExecutor defaultOrderExecutor = new DefaultOrderExecutor((Function)null, null, null, null);
         System.out.println(defaultOrderExecutor);
     }
+
+    @Test
+    void name2() {
+        DefaultOrderExecutor<Object, Object, Object> build = DefaultOrderExecutor.builder().build();
+        System.out.println(build);
+
+    }
 }
