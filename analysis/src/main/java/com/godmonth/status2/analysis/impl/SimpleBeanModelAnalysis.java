@@ -35,7 +35,7 @@ public class SimpleBeanModelAnalysis<MODEL> implements ModelAnalysis<MODEL> {
 
     @Override
     public void validate(MODEL model) {
-        Validate.isTrue(modelClass.equals(model.getClass()), "modeClass mismatched,expected:%s,actual:%s", modelClass, model.getClass());
+        Validate.isTrue(modelClass.isAssignableFrom(model.getClass()), "modeClass mismatched or inherited,expected:%s,actual:%s", modelClass, model.getClass());
         if (predicateList != null) {
             for (Predicate<MODEL> modelPredicate : predicateList) {
                 modelPredicate.test(model);
