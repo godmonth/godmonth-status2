@@ -82,7 +82,7 @@ public class BindingListBuilder {
         Object[] keys = bindingKeyFunction.apply(aClass);
         List<Pair<Object, T>> pairs = new ArrayList<>();
         if (keys != null) {
-            T component = (T) autowireCapableBeanFactory.autowire(aClass, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
+            T component = (T) autowireCapableBeanFactory.createBean(aClass, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
             for (int i = 0; i < keys.length; i++) {
                 Object key = keys[i];
                 if (component != null) {
