@@ -10,12 +10,11 @@ import com.godmonth.status2.test.sample.repo.SampleModelRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureDataJpa;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ImportResource;
-
-import jakarta.annotation.Resource;
 
 /**
  * <p></p >
@@ -30,7 +29,8 @@ public class XmlTest {
     @Autowired
     private SampleModelRepository sampleModelRepository;
 
-    @Resource(name = "sampleModelExecutor")
+    @Autowired
+    @Qualifier("sampleModelExecutor")
     private OrderExecutor<SampleModel, Object> sampleModelExecutor;
 
     @Test

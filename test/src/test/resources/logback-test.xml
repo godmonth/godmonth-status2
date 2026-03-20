@@ -5,7 +5,7 @@
             <pattern>%-4relative [%thread] %-5level %class - %msg%n</pattern>
         </layout>
     </appender>
-    <logger name="jdbc.sqlonly">
+    <logger name="p6spy">
         <level value="trace"/>
     </logger>
     <logger name="status">

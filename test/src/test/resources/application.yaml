@@ -1,7 +1,7 @@
 spring:
   datasource:
-    driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
-    url: jdbc:log4jdbc:h2:mem:testdb
+    driver-class-name: com.p6spy.engine.spy.P6SpyDriver
+    url: jdbc:p6spy:h2:mem:testdb
   jpa:
     properties:
       hibernate:
@@ -11,11 +11,11 @@ spring:
         hbm2ddl:
           auto: create-drop
   db2:
-    driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
-    jdbcUrl: jdbc:log4jdbc:h2:mem:db2
+    driver-class-name: com.p6spy.engine.spy.P6SpyDriver
+    jdbcUrl: jdbc:p6spy:h2:mem:db2
   db3:
-    driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
-    jdbcUrl: jdbc:log4jdbc:h2:mem:db3
+    driver-class-name: com.p6spy.engine.spy.P6SpyDriver
+    jdbcUrl: jdbc:p6spy:h2:mem:db3
 aaa:
   bbb: ccc
 
