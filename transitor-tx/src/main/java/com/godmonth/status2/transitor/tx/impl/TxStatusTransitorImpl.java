@@ -16,7 +16,9 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionOperations;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -33,26 +35,40 @@ public class TxStatusTransitorImpl<MODEL, STATUS, TRIGGER>
 
     protected StatusTransitor<STATUS, TRIGGER> statusTransitor;
 
-    protected Function<STATUS, StatusEntry<MODEL, Object>> statusEntryFunction;
+    protected Function<STATUS, List<StatusEntry<MODEL, Object>>> statusEntryListFunction;
 
     protected TransactionOperations transactionOperations;
 
     protected Merger<MODEL> modelMerger;
 
-    public static <STATUS, MODEL> Function<STATUS, StatusEntry<MODEL, Object>> convert(List<Pair<STATUS, StatusEntry>> entryBindList) {
-        Map<STATUS, StatusEntry<MODEL, Object>> statusStatusEntryMap = new HashMap<>();
+    public static <STATUS, MODEL> Function<STATUS, List<StatusEntry<MODEL, Object>>> convert(List<Pair<STATUS, StatusEntry>> entryBindList) {
+        Map<STATUS, List<StatusEntry<MODEL, Object>>> statusStatusEntryMap = new LinkedHashMap<>();
         for (Pair<STATUS, StatusEntry> binding : entryBindList) {
-            statusStatusEntryMap.put(binding.getKey(), binding.getValue());
+            statusStatusEntryMap.computeIfAbsent(binding.getKey(), k -> new ArrayList<>()).add(binding.getValue());
         }
         return statusStatusEntryMap::get;
     }
 
+    public void setStatusEntryListFunction(Function<STATUS, List<StatusEntry<MODEL, Object>>> statusEntryListFunction) {
+        this.statusEntryListFunction = statusEntryListFunction;
+    }
+
     public void setStatusEntryBindingList(List<Pair<STATUS, StatusEntry>> entryBindingList) {
-        setStatusEntryFunction(convert(entryBindingList));
+        setStatusEntryListFunction(convert(entryBindingList));
     }
 
     public void setStatusEntryBindingMap(Map<STATUS, StatusEntry> entryBindingMap) {
-        setStatusEntryFunction(entryBindingMap::get);
+        setStatusEntryListFunction(status -> {
+            StatusEntry<MODEL, Object> entry = entryBindingMap.get(status);
+            return entry != null ? Collections.singletonList(entry) : null;
+        });
+    }
+
+    public void setStatusEntryFunction(Function<STATUS, StatusEntry<MODEL, Object>> statusEntryFunction) {
+        setStatusEntryListFunction(status -> {
+            StatusEntry<MODEL, Object> entry = statusEntryFunction.apply(status);
+            return entry != null ? Collections.singletonList(entry) : null;
+        });
     }
 
     @Override
@@ -85,19 +101,21 @@ public class TxStatusTransitorImpl<MODEL, STATUS, TRIGGER>
     protected void afterChange(TransitedResult<MODEL, Object> transitedResult) {
         STATUS status = modelAnalysis.getStatus(transitedResult.getModel());
         Validate.notNull(status, "status is null");
-        if (statusEntryFunction != null) {
-            StatusEntry<MODEL, Object> statusEntry = statusEntryFunction.apply(status);
-            if (statusEntry != null) {
-                statusEntry.nextStatusEntry(transitedResult);
+        if (statusEntryListFunction != null) {
+            List<StatusEntry<MODEL, Object>> statusEntries = statusEntryListFunction.apply(status);
+            if (statusEntries != null) {
+                for (StatusEntry<MODEL, Object> statusEntry : statusEntries) {
+                    statusEntry.nextStatusEntry(transitedResult);
+                }
             }
         }
     }
 
     public static class TxStatusTransitorImplBuilder<MODEL, STATUS, TRIGGER> {
-        protected Function<STATUS, StatusEntry<MODEL, Object>> statusEntryFunction;
+        protected Function<STATUS, List<StatusEntry<MODEL, Object>>> statusEntryListFunction;
 
         public TxStatusTransitorImplBuilder statusEntryBindList(List<Pair<STATUS, StatusEntry>> entryBindList) {
-            this.statusEntryFunction = convert(entryBindList);
+            this.statusEntryListFunction = convert(entryBindList);
             return this;
         }
 

@@ -15,4 +15,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Entry {
+
+    /**
+     * 同一个状态对应多个 Entry 时，按 order 升序执行；数值越小越先执行；默认 0。
+     */
+    int order() default 0;
 }

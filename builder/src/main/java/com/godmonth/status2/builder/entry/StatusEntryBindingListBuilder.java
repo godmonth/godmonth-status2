@@ -8,9 +8,12 @@ import lombok.Singular;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.core.annotation.AnnotationUtils;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -25,6 +28,9 @@ public class StatusEntryBindingListBuilder {
 
     @Builder
     private static List<Pair<Object, StatusEntry>> build(ClassLoader classLoader, @Singular Set<String> packageNames, Class modelClass, Predicate<Class> predicate, AutowireCapableBeanFactory autowireCapableBeanFactory, Function<Class, Object[]> bindingKeyFunction) throws IOException, ClassNotFoundException {
-        return BindingListBuilder.<StatusEntry>builder().classLoader(classLoader).enableAnnotationClass(Entry.class).packageNames(packageNames).ancestorClass(StatusEntry.class).modelClass(modelClass).predicate(predicate).autowireCapableBeanFactory(autowireCapableBeanFactory).bindingKeyFunction(bindingKeyFunction).build();
+        List<Pair<Object, StatusEntry>> list = BindingListBuilder.<StatusEntry>builder().classLoader(classLoader).enableAnnotationClass(Entry.class).packageNames(packageNames).ancestorClass(StatusEntry.class).modelClass(modelClass).predicate(predicate).autowireCapableBeanFactory(autowireCapableBeanFactory).bindingKeyFunction(bindingKeyFunction).build();
+        list.sort(Comparator.comparingInt(p -> Optional.ofNullable(AnnotationUtils.findAnnotation(p.getValue().getClass(), Entry.class)).map(Entry::order).orElse(0)));
+        log.debug("status entry binding list sorted: {}", list);
+        return list;
     }
 }
