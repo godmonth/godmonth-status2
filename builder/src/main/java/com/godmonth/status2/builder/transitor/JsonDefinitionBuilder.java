@@ -1,9 +1,9 @@
 package com.godmonth.status2.builder.transitor;
 
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.CollectionType;
-import com.fasterxml.jackson.databind.type.TypeFactory;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.type.CollectionType;
+import tools.jackson.databind.type.TypeFactory;
 import lombok.Builder;
 import org.apache.commons.lang3.Validate;
 import org.springframework.core.io.Resource;
@@ -21,11 +21,11 @@ public class JsonDefinitionBuilder {
 
     @Builder
     private static <STATUS, TRIGGER> Function<STATUS, Function<TRIGGER, STATUS>> build(Class<STATUS> statusClass, Class<TRIGGER> triggerClass, Resource resource) throws IOException {
-        TypeFactory typeFactory = TypeFactory.defaultInstance();
+        ObjectMapper objectMapper = new ObjectMapper();
+        TypeFactory typeFactory = objectMapper.getTypeFactory();
         JavaType javaType = typeFactory.constructParametricType(StatusMachineDefinition.class, statusClass, triggerClass);
         CollectionType collectionType = typeFactory.constructCollectionType(List.class, javaType);
         List<StatusMachineDefinition> statusDefinitions = null;
-        ObjectMapper objectMapper = new ObjectMapper();
         try (InputStream inputStream = resource.getInputStream()) {
             statusDefinitions = objectMapper.readValue(inputStream, collectionType);
         }

@@ -28,7 +28,6 @@
         <dependency>
             <groupId>com.godmonth</groupId>
             <artifactId>godmonth-commons</artifactId>
-            <version>1.0.2</version>
         </dependency>
     </dependencies>
 

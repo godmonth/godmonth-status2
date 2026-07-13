@@ -2,13 +2,13 @@ package com.godmonth.status2.test.sample.db2;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateProperties;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateSettings;
-import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
+import org.springframework.boot.hibernate.autoconfigure.HibernateProperties;
+import org.springframework.boot.hibernate.autoconfigure.HibernateSettings;
+import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
+import org.springframework.boot.jpa.EntityManagerFactoryBuilder;
+import org.springframework.boot.jpa.autoconfigure.JpaProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
-import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -20,7 +20,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionOperations;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import java.util.Map;
 
@@ -39,7 +39,7 @@ public class RepoConfig2 {
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(
             @Qualifier("d2") DataSource userDataSource, JpaProperties jpaProperties) {
         JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
-        EntityManagerFactoryBuilder builder = new EntityManagerFactoryBuilder(vendorAdapter, jpaProperties.getProperties(), null);
+        EntityManagerFactoryBuilder builder = new EntityManagerFactoryBuilder(vendorAdapter, ds -> jpaProperties.getProperties(), null);
         HibernateProperties hibernateProperties = new HibernateProperties();
         Map<String, Object> properties = hibernateProperties.determineHibernateProperties(jpaProperties.getProperties(), new HibernateSettings());
         return builder.dataSource(userDataSource).properties(properties).packages("com.godmonth.status2.test.sample.domain").build();

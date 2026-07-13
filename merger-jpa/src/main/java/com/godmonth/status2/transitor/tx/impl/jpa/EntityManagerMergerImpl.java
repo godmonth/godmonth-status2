@@ -4,7 +4,7 @@ import com.godmonth.status2.transitor.tx.impl.Merger;
 import lombok.Builder;
 import lombok.Setter;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 @Builder
 public class EntityManagerMergerImpl<MODEL> implements Merger<MODEL> {
