@@ -87,7 +87,7 @@ public class OrderExecutorFactoryBean implements FactoryBean<OrderExecutor>, App
 
         final String transactionOperationsRef = (String) annotationAttributes.get("transactionOperationsRef");
         TransactionOperations transactionOperations = null;
-        if (StringUtils.isNotBlank(entityManagerRef)) {
+        if (StringUtils.isNotBlank(transactionOperationsRef)) {
             transactionOperations = (TransactionOperations) applicationContext.getBean(transactionOperationsRef);
         } else {
             transactionOperations = applicationContext.getBean(TransactionOperations.class);
