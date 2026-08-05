@@ -10,4 +10,5 @@
     </parent>
 
     <artifactId>transitor-core</artifactId>
+    <name>godmonth status2 transitor-core</name>
 </project>

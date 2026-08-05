@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>builder</artifactId>
+    <name>godmonth status2 builder</name>
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>

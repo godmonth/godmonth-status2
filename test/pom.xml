@@ -9,6 +9,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>test</artifactId>
+    <name>godmonth status2 test</name>
     <dependencyManagement>
         <dependencies>
             <dependency>

@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>executor-core</artifactId>
+    <name>godmonth status2 executor-core</name>
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>

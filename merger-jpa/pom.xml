@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>merger-jpa</artifactId>
+    <name>godmonth status2 merger-jpa</name>
     <dependencies>
         <dependency>
             <groupId>jakarta.persistence</groupId>

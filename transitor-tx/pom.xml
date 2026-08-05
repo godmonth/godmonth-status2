@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>transitor-tx</artifactId>
+    <name>godmonth status2 transitor-tx</name>
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>

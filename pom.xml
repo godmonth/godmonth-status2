@@ -84,6 +84,15 @@
              </plugin>-->
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
                 <configuration>
                     <encoding>utf-8</encoding>
                     <doclint>none</doclint>
