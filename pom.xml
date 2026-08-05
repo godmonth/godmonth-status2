@@ -50,13 +50,6 @@
         <url>https://github.com/godmonth/godmonth-status</url>
         <tag>HEAD</tag>
     </scm>
-    <distributionManagement>
-        <snapshotRepository>
-            <id>bonus-maven-snapshots</id>
-            <url>https://sdk.platon.network/nexus/repository/maven-snapshots</url>
-            <uniqueVersion>false</uniqueVersion>
-        </snapshotRepository>
-    </distributionManagement>
     <build>
         <pluginManagement>
             <plugins>
