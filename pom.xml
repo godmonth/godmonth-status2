@@ -273,6 +273,7 @@
                 <plugins>
                     <plugin>
                         <artifactId>maven-gpg-plugin</artifactId>
+                        <version>3.2.8</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -280,6 +281,10 @@
                                 <goals>
                                     <goal>sign</goal>
                                 </goals>
+                                <configuration>
+                                    <executable>C:\Program Files\GnuPG\bin\gpg.exe</executable>
+                                    <keyname>71C627F2BFEA01FC</keyname>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
