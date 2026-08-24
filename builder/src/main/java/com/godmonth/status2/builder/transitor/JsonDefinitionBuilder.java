@@ -1,9 +1,9 @@
 package com.godmonth.status2.builder.transitor;
 
-import tools.jackson.databind.JavaType;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.type.CollectionType;
-import tools.jackson.databind.type.TypeFactory;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import lombok.Builder;
 import org.apache.commons.lang3.Validate;
 import org.springframework.core.io.Resource;
