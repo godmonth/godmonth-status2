@@ -40,7 +40,7 @@ flowchart LR
         direction TB
         T1["改状态"] --> T2["TransitionCallback<br/>写业务数据"] --> T3["merge 模型"]
     end
-    T --> E["StatusEntry<br/>通知、触发其他订单"]
+    T --> E["StatusEntry<br/>通知、触发其他订单<br/>只执行一次"]
 ```
 
 于是每件事该放在哪里就很清楚了：
@@ -49,8 +49,10 @@ flowchart LR
 |---|---|---|
 | 查询下游结果、调用外部接口 | `Advancer.advance` | 在事务外，不长时间占用数据库事务；失败了下次推进重来 |
 | 写与这次跃迁绑定的业务数据（金额、时间、关联单据） | `TransitionCallback` | 与状态在同一个事务里，一起提交或回滚 |
-| 发通知、触发其他订单推进 | `StatusEntry` | 跃迁事务结束后执行，不影响跃迁本身 |
+| 发通知、触发其他订单推进 | `StatusEntry` | 跃迁事务结束后执行，不影响跃迁本身；只执行一次，失败不会重来 |
 | 绕过框架直接改状态字段并保存 | 不要这样做 | 绕过了 JSON 定义和跃迁事务 |
+
+> **StatusEntry 不可重入，只有一次机会。** 它只在跃迁进入某个状态、事务结束之后执行这一次。执行失败框架不会重试；而订单已经停在这个状态上，之后无论推进多少次、巡检多少次，都不会再"进入"一次这个状态，这个 Entry 也就不会再执行。这一点与 Advancer 正好相反：Advancer 随时可以反复执行，StatusEntry 只有一次。
 
 ### 1.3 定时巡检兜底
 
@@ -58,7 +60,7 @@ flowchart LR
 
 - 进程在异步推进途中重启、下游结果到了但回调丢了，订单会停在中间状态，巡检会把它接着推下去；
 - 超时关闭这类依赖时间的跃迁，本身就是靠巡检触发的；
-- StatusEntry 里做的通知、下游推进如果失败，也应该能被巡检补上。
+- 巡检**不会**重放 StatusEntry（见 1.2）。StatusEntry 里失败的事，只能靠它自己的重试或对账机制，或者下游订单自己的巡检来补。
 
 ### 1.4 一次推进的全过程
 
@@ -72,7 +74,7 @@ flowchart TD
     R -->|有| J{"Advancer 判断<br/>条件满足？"}
     J -->|"不满足，返回 null"| STOP
     J -->|"满足，返回触发器"| T["跃迁（一个事务）<br/>改状态、TransitionCallback、merge"]
-    T --> E["StatusEntry<br/>跃迁事务结束后"]
+    T --> E["StatusEntry<br/>跃迁事务结束后，只执行一次"]
     E --> N{"nextOperation"}
     N -->|"ADVANCE（默认）"| R
     N -->|PAUSE| STOP
@@ -443,7 +445,7 @@ public class CloseAdvancer
 
 ### 4.8 编写 StatusEntry
 
-StatusEntry 在跃迁事务结束之后执行，适合发通知、触发其他订单推进：
+StatusEntry 在跃迁事务结束之后执行，**不可重入，只有一次机会**，适合发通知、触发其他订单推进：
 
 ```java
 @Entry
@@ -467,7 +469,7 @@ public class OrderNotifyEntry implements StatusEntry<PaymentOrder, Object> {
 - 同一个状态可以有多个 StatusEntry，按 `@Entry(order = ...)` 从小到大执行；
 - StatusEntry **只按状态绑定**，不要加指令绑定注解。加了会被绑定成（状态, 指令），永远匹配不到；
 - 扫描规则与 Advancer 相同：顶层类、位于 `entryBasePackages` 下、带 `@Entry`、实现 `StatusEntry`，不要加 `@Component`；
-- StatusEntry 抛异常时，跃迁已经提交，异常会抛给调用方；之后的推进也不会再执行这个 Entry。所以这里只放"失败了也能补上"的事，比如可以重试的通知，或下游订单自己会被巡检推进的触发动作。必须与状态一致的数据，放到 `TransitionCallback` 里。
+- **不可重入，只有一次机会**：StatusEntry 只在跃迁进入该状态时执行一次。抛异常时跃迁已经提交，异常会抛给调用方，框架不会重试，之后的推进和巡检也不会再执行它。所以这里只放丢了也有别的途径补上的事：通知要有自己的重试或对账；触发下游订单推进时，下游订单要有自己的巡检。必须与状态一致的数据，放到 `TransitionCallback` 里。
 
 ### 4.9 在领域服务中推进
 
@@ -676,7 +678,7 @@ src/main/resources/json/status-machine-payment-order.json
 - [ ] 编写配置类：`@OrderExecutor` + `StateMachineAnalysis` Bean，配置线程池
 - [ ] 每个非终态都有 Advancer 负责推进，条件不满足时返回 `null`
 - [ ] 与跃迁绑定的数据写在 `TransitionCallback` 里
-- [ ] StatusEntry 只做失败后可补偿的事
+- [ ] StatusEntry 只有一次执行机会，只做失败后有别的途径补上的事
 - [ ] 领域服务在事务外调用 `execute` / `executeAsync2`
 - [ ] 配置定时巡检
 - [ ] Advancer 单元测试 + 状态机一致性测试
