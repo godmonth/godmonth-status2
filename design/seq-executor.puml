@@ -1,0 +1,91 @@
+@startuml seq-executor
+skinparam shadowing false
+skinparam sequenceMessageAlign left
+autonumber
+
+title OrderExecutor 执行时序（DefaultOrderExecutor）
+
+participant "调用方" as Caller
+participant "DefaultOrderExecutor" as Exec
+participant "ModelAnalysis" as MA
+participant "StatusAdvancer\n（业务实现）" as Adv
+participant "TxStatusTransitorImpl" as Tx
+participant "StatusTransitor\n（SimpleStatusTransitor）" as ST
+participant "TransitionCallback\n（业务实现）" as CB
+participant "Merger" as Merger
+participant "StatusEntry\n（业务实现）" as Entry
+participant "线程池" as Pool
+
+== 入口 ==
+alt 同步
+  Caller -> Exec : execute(ExecutionRequest{model, instruction, message})
+  Exec -> Exec : execute1(model, instruction, message)
+else 异步
+  Caller -> Exec : executeAsync2(ExecutionRequest)
+  Exec -> MA : validate(model)
+  Exec ->> Pool : submit(execute1(model, instruction, message))
+  Exec --> Caller : ListenableFuture<SyncResult>
+  Pool -> Exec : execute1(...)\n异常只记日志
+end
+
+== execute1：推进循环 ==
+Exec -> MA : validate(model)\n模型类型匹配，执行 predicate
+loop 直到 break
+  Exec -> MA : getStatus(model)
+  MA --> Exec : status
+  Exec -> Exec : 查找 Advancer\ninstruction 不为空时先按（status, instruction）查\n未找到再按 status 查
+  break 未找到 Advancer
+    Exec -> Exec : 结束循环
+  end
+
+  Exec -> Adv : advance(AdvanceRequest{model, instruction, message})
+  Adv --> Exec : AdvancedResult
+  break AdvancedResult 为空，或没有 TriggerBehavior
+    Exec -> Exec : 结束循环
+  end
+  opt updatedModel 不为空
+    Exec -> Exec : model = updatedModel
+  end
+
+  Exec -> Tx : transit(model, triggerBehavior)
+  activate Tx
+  Tx -> MA : getStatus(model)
+  Tx -> ST : transit(status, trigger)
+  ST --> Tx : nextStatus\n状态或触发器未定义时抛异常
+  group 事务内（transactionOperations.execute）
+    Tx -> MA : setStatus(model, nextStatus)
+    opt 有 TransitionCallback
+      Tx -> CB : beforeMerge(model)
+      CB --> Tx : accessory\n如同事务落库的关联记录
+    end
+    Tx -> Merger : mergeInTx(model)
+    Merger --> Tx : mergedModel
+  end
+  Tx -> MA : getStatus(mergedModel)
+  loop 新状态绑定的每个 StatusEntry（按 @Entry.order）
+    Tx -> Entry : nextStatusEntry(TransitedResult{mergedModel, accessory})
+  end
+  Tx --> Exec : mergedModel
+  deactivate Tx
+
+  opt 有 nextInstruction
+    Exec -> Exec : drop = true 时清空 instruction / message\ninstruction 不为空时替换 instruction / message
+  end
+  alt nextOperation = ADVANCE（默认）
+    Exec -> Exec : 以新状态继续循环
+  else nextOperation = ASYNC_ADVANCE
+    Exec ->> Pool : submit(execute1(model, instruction, message))
+    Exec -> Exec : 结束循环，后续推进在线程池中继续
+  else nextOperation = PAUSE
+    Exec -> Exec : 结束循环
+  end
+end
+
+Exec --> Caller : SyncResult{model, symbol, value}\nsymbol / value 取自结束循环那一步的 AdvancedResult.syncData\n因未找到 Advancer 而结束时为空\n（异步入口时写入 Future）
+
+note over Tx, Entry
+  StatusEntry 在 transactionOperations.execute 返回后回调；
+  若调用方已开启外层事务（如经 getTxStatusTransitor() 直接迁移），此时外层事务尚未提交
+end note
+
+@enduml

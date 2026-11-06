@@ -1,0 +1,56 @@
+@startuml component
+title godmonth-status2 组件关系图
+
+top to bottom direction
+skinparam componentStyle uml2
+
+' 第一层：装配
+component "builder\nOrderExecutorBeanDefinitionRegistrar\nOrderExecutorFactoryBean\nJsonDefinitionBuilder\nAdvancerBindingListBuilder / StatusEntryBindingListBuilder" as builder
+
+' 第二层：执行
+component "executor-core\nOrderExecutor / DefaultOrderExecutor" as executor
+
+' 第三层：推进与迁移
+component "advancer-core\nStatusAdvancer / AdvancedResult\nNextOperation（ADVANCE / PAUSE / ASYNC_ADVANCE）" as advancer
+component "transitor-tx\nTxStatusTransitor / TxStatusTransitorImpl\nTriggerBehavior / TransitionCallback / StatusEntry / Merger\n事务内：写状态 → TransitionCallback → merge" as transitorTx
+component "merger-jpa\nEntityManagerMergerImpl" as mergerJpa
+
+' 第四层：基础
+component "transitor-core\nStatusTransitor / SimpleStatusTransitor" as transitorCore
+component "analysis\nModelAnalysis / AnnotationBeanModelAnalysis\nStateMachineAnalysis / AnnotationField" as analysis
+component "annotations\n@Status / @Advancer / @Entry / @ModelBinding\n@StatusBinding / @InstructionBinding" as annotations
+
+' 装配
+builder .down.> executor : 组装 DefaultOrderExecutor
+builder .down.> advancer : 扫描并绑定 StatusAdvancer 实现
+builder .down.> transitorTx : 组装 TxStatusTransitorImpl\n扫描并绑定 StatusEntry 实现\n（entityManager::merge 作为 Merger）
+builder .down.> transitorCore : JSON 定义 → SimpleStatusTransitor
+builder .down.> analysis : 取 StateMachineAnalysis 绑定键
+builder .down.> annotations : 识别 @Advancer / @Entry
+
+' 执行
+executor .down.> advancer : 按（状态, 指令）路由并 advance
+executor .down.> transitorTx : transit
+executor .down.> analysis : 校验模型 / 读状态
+
+' 推进与迁移
+advancer .down.> transitorTx : AdvancedResult 携带 TriggerBehavior
+mergerJpa .up.> transitorTx : 实现 Merger
+transitorTx .down.> transitorCore : 计算下一状态
+transitorTx .down.> analysis : 写状态字段
+
+' 模型解析
+analysis .down.> annotations : 解析 @Status / 绑定注解
+
+note right of mergerJpa
+  builder 不使用该实现，直接以 entityManager::merge 作为 Merger；
+  手动装配 TxStatusTransitorImpl 时可选用
+end note
+
+note bottom of annotations
+  绑定键优先取 AnnotationField 指定的自定义注解，
+  缺省时回退到 @StatusBinding / @InstructionBinding；
+  bom：统一管理以上各模块版本
+end note
+
+@enduml

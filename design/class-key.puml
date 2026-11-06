@@ -1,0 +1,159 @@
+@startuml class-key
+title godmonth-status2 关键类类图
+
+left to right direction
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+hide empty members
+
+package "builder" {
+  annotation "@OrderExecutor" as OrderExecutorAnno {
+    beanName : String
+    stateMachineDefinitionResource : String
+    advancerBasePackages : String[]
+    entryBasePackages : String[]
+    stateMachineAnalysisRef : String
+    transactionOperationsRef : String
+    entityManagerRef : String
+    threadPoolRef : String
+  }
+  class OrderExecutorBeanDefinitionRegistrar {
+    + registerBeanDefinitions(AnnotationMetadata, BeanDefinitionRegistry)
+  }
+  class OrderExecutorFactoryBean {
+    - annotationAttributes : Map<String, Object>
+    - underlyClass : Class
+    + getObject() : OrderExecutor
+  }
+  class JsonDefinitionBuilder {
+    + {static} build(statusClass, triggerClass, resource) : Function<STATUS, Function<TRIGGER, STATUS>>
+  }
+  class AdvancerBindingListBuilder {
+    + {static} build(...) : List<Pair<Object, StatusAdvancer>>
+  }
+  class StatusEntryBindingListBuilder {
+    + {static} build(...) : List<Pair<Object, StatusEntry>>
+  }
+}
+
+package "executor-core" {
+  interface OrderExecutor
+  class "DefaultOrderExecutor<MODEL, INST, TRIGGER>" as DefaultOrderExecutor {
+    # advancerRouter : Function<Object, StatusAdvancer>
+    # txStatusTransitor : TxStatusTransitor
+    # modelAnalysis : ModelAnalysis
+    # executorService : ExecutorService
+    + execute(ExecutionRequest) : SyncResult
+    + executeAsync2(ExecutionRequest) : ListenableFuture<SyncResult>
+    # execute1(MODEL, INST, Object) : SyncResult
+  }
+}
+
+package "advancer-core" {
+  interface StatusAdvancer
+  abstract class "InstructionAdvancer<MODEL, INST, TRIGGER>" as InstructionAdvancer {
+    # expectedInstruction : INST
+    + advance(AdvanceRequest) : AdvancedResult
+    # {abstract} doAdvance(MODEL, Object) : AdvancedResult
+  }
+}
+
+package "transitor-tx" {
+  interface TxStatusTransitor
+  interface StatusEntry
+  interface Merger
+  class "TxStatusTransitorImpl<MODEL, STATUS, TRIGGER>" as TxStatusTransitorImpl {
+    # modelAnalysis : ModelAnalysis
+    # statusTransitor : StatusTransitor
+    # statusEntryListFunction : Function<STATUS, List<StatusEntry>>
+    # transactionOperations : TransactionOperations
+    # modelMerger : Merger
+    + transit(MODEL, TriggerBehavior) : MODEL
+    # beforeChange(MODEL, TRIGGER) : STATUS
+    # afterChange(TransitedResult) : void
+  }
+}
+
+package "merger-jpa" {
+  class "EntityManagerMergerImpl<MODEL>" as EntityManagerMergerImpl {
+    - entityManager : EntityManager
+    + mergeInTx(MODEL) : MODEL
+  }
+}
+
+package "transitor-core" {
+  interface StatusTransitor
+  class "SimpleStatusTransitor<STATUS, TRIGGER>" as SimpleStatusTransitor {
+    - config : Function<STATUS, Function<TRIGGER, STATUS>>
+    + transit(STATUS, TRIGGER) : STATUS
+  }
+  class "StringStatusTransitor<STATUS, TRIGGER>" as StringStatusTransitor {
+    - config : Map<String, Map<String, String>>
+    - statusClass : Class<STATUS>
+    + transit(STATUS, TRIGGER) : STATUS
+  }
+}
+
+package "analysis" {
+  interface ModelAnalysis
+  class "SimpleBeanModelAnalysis<MODEL>" as SimpleBeanModelAnalysis {
+    # modelClass : Class<MODEL>
+    # statusPropertyName : String
+    # statusClass : Class
+    # triggerClass : Class
+    # predicateList : List<Predicate<MODEL>>
+  }
+  class "AnnotationBeanModelAnalysis<MODEL>" as AnnotationBeanModelAnalysis
+  class "StateMachineAnalysis<MODEL>" as StateMachineAnalysis {
+    - modelAnalysis : ModelAnalysis
+    # bindingKeyFunction : Function<Class, Object[]>
+  }
+}
+
+' 装配
+OrderExecutorAnno ..> OrderExecutorBeanDefinitionRegistrar : @Import
+OrderExecutorBeanDefinitionRegistrar ..> OrderExecutorFactoryBean : 注册 BeanDefinition
+OrderExecutorFactoryBean ..> StateMachineAnalysis : 从容器获取
+OrderExecutorFactoryBean ..> JsonDefinitionBuilder : 读取 JSON 定义
+OrderExecutorFactoryBean ..> AdvancerBindingListBuilder : 扫描 Advancer
+OrderExecutorFactoryBean ..> StatusEntryBindingListBuilder : 扫描 StatusEntry
+OrderExecutorFactoryBean ..> SimpleStatusTransitor : <<create>>
+OrderExecutorFactoryBean ..> TxStatusTransitorImpl : <<create>>
+OrderExecutorFactoryBean ..> DefaultOrderExecutor : <<create>>
+
+' 实现
+DefaultOrderExecutor ..|> OrderExecutor
+InstructionAdvancer ..|> StatusAdvancer
+TxStatusTransitorImpl ..|> TxStatusTransitor
+EntityManagerMergerImpl ..|> Merger
+SimpleStatusTransitor ..|> StatusTransitor
+StringStatusTransitor ..|> StatusTransitor
+SimpleBeanModelAnalysis ..|> ModelAnalysis
+AnnotationBeanModelAnalysis --|> SimpleBeanModelAnalysis
+
+' 关联
+DefaultOrderExecutor --> "*" StatusAdvancer : advancerRouter\n绑定键 → Advancer
+DefaultOrderExecutor --> "1" TxStatusTransitor
+DefaultOrderExecutor --> "1" ModelAnalysis
+TxStatusTransitorImpl --> "1" StatusTransitor
+TxStatusTransitorImpl --> "*" StatusEntry : 按状态分组
+TxStatusTransitorImpl --> "1" Merger
+TxStatusTransitorImpl --> "1" ModelAnalysis
+StateMachineAnalysis --> "1" ModelAnalysis
+
+note bottom of AnnotationBeanModelAnalysis
+  构造时找到模型上的 @Status 字段（或 getter），
+  推出 statusPropertyName / statusClass / triggerClass
+end note
+
+note bottom of StateMachineAnalysis
+  bindingKeyFunction 计算 Advancer / StatusEntry 的绑定键：
+  状态，或（状态, 指令）
+end note
+
+note right of OrderExecutorFactoryBean
+  builder 装配时以 entityManager::merge 作为 Merger，
+  不使用 EntityManagerMergerImpl
+end note
+
+@enduml
